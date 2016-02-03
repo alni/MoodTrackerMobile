@@ -90,11 +90,20 @@ sap.ui.define([
             this.setModel(deviceModel, "device");
 
             var moods = MoodModel.readValue("moods", [0, 0, 0, 0, 0, 0, 0]);
-                //[7, 8, 7, 7, 5, 6, 5]; 
+            //[7, 8, 7, 7, 5, 6, 5]; 
+
+            var past = moods.map(function (item, i) {
+                return $.isNumeric(item) ? {
+                    "value": item,
+                    "editable": false,
+                    "day": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i]
+                } : item;
+            });
+            console.log(past);
 
             var moodModel = new JSONModel({
                 current: moods[new Date().getDay()],
-                past: moods, //[-3, 2, 5, 0, 10, 1, -10]
+                past: past, //moods, //[-3, 2, 5, 0, 10, 1, -10]
                 min: MoodModel.readValue("moodMin", -10),
                 max: MoodModel.readValue("moodMax", 10)
             });

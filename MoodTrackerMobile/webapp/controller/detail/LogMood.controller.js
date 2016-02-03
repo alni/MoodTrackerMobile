@@ -59,7 +59,7 @@ sap.ui.define([
                 oSource = oEvent.getSource(),
                 oModel = oView.getModel("mood"),
                 currentDay = new Date().getDay();
-            oModel.setProperty("/past/" + currentDay, oSource.getValue());
+            oModel.setProperty("/past/" + currentDay + "/value", oSource.getValue());
             oModel.refresh(true);
         },
 

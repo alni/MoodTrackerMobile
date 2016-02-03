@@ -327,7 +327,11 @@ sap.ui.define([
 
             
 
-            var outputData = this.createDataSet(inputData, dayShift);
+            var outputData = this.createDataSet(inputData.map(function (item, index) {
+                console.log(item);
+                return item.value;   
+            }), dayShift);
+            console.log(outputData);
             var moodAreasData = this.createMoodAreaDatasets(min, max);
             var realMax = Math.max.apply(null, outputData);
             if (realMax < moodAreasData.good[0]) {
@@ -482,7 +486,9 @@ sap.ui.define([
                 oLineChart.datasets[2].points[index].value = item;
             });
 
-            var outputData = this.createDataSet(inputData, dayShift);
+            var outputData = this.createDataSet(inputData.map(function(item, index) {
+                return item.value;   
+            }), dayShift);
             var average = this.createFlatDataSet(Formatter.average(outputData))
                 .concat(Formatter.average(outputData));
             var median = this.createFlatDataSet(Formatter.median(outputData))

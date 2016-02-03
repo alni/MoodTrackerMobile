@@ -37,8 +37,8 @@ sap.ui.define([
     var localizedValue = null,
         formattedValue = null;
 
-    localizedValue = function (value, bundleText) {
-        var oModel = this.getModel("i18n"),
+    localizedValue = function (value, bundleText, _this) {
+        var oModel = _this.getModel("i18n"),
             oBundle = oModel && oModel.getResourceBundle(),
             localizedValue = oBundle && oBundle.getText(bundleText + "_" + value);
         if (!localizedValue || localizedValue === bundleText + "_" + value) {
@@ -58,6 +58,18 @@ sap.ui.define([
             var args = [].concat($.makeArray(arguments));
             console.log(args);
             return formattedValue(args[0], args.slice(1, args.length), this);
+        },
+        localizedValue: function (value, bundleText) {
+            console.log(value + " | " + bundleText);
+            return localizedValue(value, bundleText, this);
+        },
+        localizedFormattedValue: function () {
+            var args = [].concat($.makeArray(arguments));
+            console.log(args);
+            var _val = formattedValue(
+                localizedValue(args[0], args[1], this),
+                args.slice(2, args.length), this);
+            return _val;
         },
         categoryPageTitle : function(customTitle, categoryPageTitle, customTitleFallback) {
             var title = "";
