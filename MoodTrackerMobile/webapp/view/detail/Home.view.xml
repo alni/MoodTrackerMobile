@@ -1,0 +1,35 @@
+<core:View
+    controllerName="mood_tracker.controller.detail.Home"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:l="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:html="http://www.w3.org/1999/xhtml">
+    <Page
+        showNavButton="{device>/isPhone}"
+        navButtonPress="onNavBack"
+        showHeader="true"
+        enableScrolling="true"
+        title="{i18n>homeTitle}"
+        id="idHomePage"
+        class="pageHome">
+        <headerContent>
+            <Button id="fullScreen" visible="{device>/isNoPhone}"
+                icon="{app>/FullScreenButtonIcon}"
+                press="handleFullScreenClick" />
+            <Button
+                text="{i18n>homeAcknowledgmentsTitle}"
+                press="handleAcknowledgmentsClick"
+            />
+        </headerContent>
+      <content>
+                    <Panel height="auto">
+                        <core:HTML id="homeWelcomeHtml" content="&lt;div class='homeHtmlContent'&gt;{
+                            path: 'i18n>homeWelcomeMessage',
+                            formatter: 'mood_tracker.model.Formatter.markdownToHtml'
+                        }&lt;/div&gt;"></core:HTML>
+                    </Panel>
+      </content>
+    </Page>
+</core:View>

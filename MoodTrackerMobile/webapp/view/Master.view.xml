@@ -1,0 +1,65 @@
+<mvc:View
+  controllerName="mood_tracker.controller.Master"
+  displayBlock="true"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m">
+  <Page
+    id="page"
+    title="{i18n>masterTitle}">
+    <customHeader>
+      <Bar>
+        <contentLeft>
+          <Image src="{app>/appLogo}" height="2rem" class="sapUiContentPadding" />
+        </contentLeft>
+        <contentMiddle>
+          <Title text="{i18n>masterTitle}" />
+        </contentMiddle>
+      </Bar>
+    </customHeader>
+    <content>
+      <List
+        id="list"
+        mode="None"
+        noDataText="{i18n>masterListNoDataText}"
+        select="onSelect"
+        growing="true"
+        growingScrollToLoad="true"
+        backgroundDesign="{device>/listBackgroundDesign}">
+        <items>
+          <StandardListItem
+            id="home"
+            type="Navigation"
+            icon="sap-icon://home"
+            press="onSelect"
+            title="{i18n>masterListItemHomeText}">
+          </StandardListItem>
+          <StandardListItem
+            id="logMood"
+            type="Navigation"
+            icon="sap-icon://nurse"
+            press="onSelect"
+            title="{i18n>masterListItemLogMoodText}">
+          </StandardListItem>
+          <StandardListItem
+            id="reviewMood"
+            type="Navigation"
+            icon="sap-icon://electronic-medical-record"
+            press="onSelect"
+            title="{i18n>masterListItemReviewMoodText}">
+          </StandardListItem>
+        </items>
+      </List>
+    </content>
+    <footer>
+      <Bar>
+        <contentRight>
+          <Button
+            id="settingsButton"
+            icon="sap-icon://wrench"
+            tooltip="{i18n>masterFooterSettingsButtonTooltip}"
+            press="onSettingsButtonPress" />
+        </contentRight>
+      </Bar>
+    </footer>
+  </Page>
+</mvc:View>

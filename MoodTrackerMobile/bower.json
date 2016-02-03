@@ -1,0 +1,12 @@
+{
+  "name": "MoodTrackerMobile",
+  "private": true,
+  "dependencies": {
+    "openui5-sap.ui.core": "openui5/packaged-sap.ui.core#~1.32.10",
+    "openui5-sap.ui.layout": "openui5/packaged-sap.ui.layout#~1.32.10",
+    "openui5-sap.m": "openui5/packaged-sap.m#~1.32.10",
+    "openui5-themelib_sap_bluecrystal": "openui5/packaged-themelib_sap_bluecrystal#~1.32.10",
+    "Chart.js": "~1.0.2",
+    "marked": "~0.3.5"
+  }
+}

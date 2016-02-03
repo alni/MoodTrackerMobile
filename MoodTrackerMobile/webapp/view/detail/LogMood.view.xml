@@ -1,0 +1,128 @@
+<core:View
+    controllerName="mood_tracker.controller.detail.LogMood"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:l="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:html="http://www.w3.org/1999/xhtml">
+    <Page
+        showNavButton="{device>/isPhone}"
+        navButtonPress="onNavBack"
+        showHeader="true"
+        enableScrolling="true"
+        title="{i18n>logMoodPageTitle}"
+        id="idHomePage"
+        class="pageHome">
+        <headerContent>
+            <Button id="fullScreen" visible="{device>/isNoPhone}"
+                icon="{app>/FullScreenButtonIcon}"
+                press="handleFullScreenClick" />
+        </headerContent>
+      <content>
+        <f:SimpleForm
+            minWidth="800"
+            maxContainerCols="2"
+            editable="true"
+            layout="ResponsiveGridLayout"
+            labelSpanL="3"
+            labelSpanM="3"
+            emptySpanL="4"
+            emptySpanM="4"
+            columnsL="1"
+            columnsM="1"
+            class="editableForm">
+          <f:content>
+            <!-- Log Mood -->
+            <MessageStrip text="{
+                            parts: [{
+                              path: 'i18n>logMoodMessageSteps'
+                            }, {
+                              path: 'mood>/current'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                          }"
+                          showIcon="true"
+                          customIcon="sap-icon://nurse"/>
+            <Label text="{i18n>logMoodLabelSteps}" />
+            <Slider value="{mood>/current}" min="{mood>/min}" max="{mood>/max}" change="onCurrentMoodChange" />
+          
+        <Label text="{i18n>logMoodLabelPast}" />
+        <Panel expandable="true" expanded="false" headerText="{i18n>logMoodPastPanelHeaderText}" width="auto" class="sapUiResponsiveMargin">
+          <content>
+            <Label text="{
+                            parts: [{
+                              path: 'i18n>logMoodLabelStepsSun'
+                            }, {
+                              path: 'mood>/past/0'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                          }" />
+            <Slider value="{mood>/past/0}" min="{mood>/min}" max="{mood>/max}" />
+          
+            <Label text="{
+                            parts: [{
+                              path: 'i18n>logMoodLabelStepsMon'
+                            }, {
+                              path: 'mood>/past/1'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                          }" />
+            <Slider value="{mood>/past/1}" min="{mood>/min}" max="{mood>/max}" />
+            
+            <Label text="{
+                            parts: [{
+                              path: 'i18n>logMoodLabelStepsTue'
+                            }, {
+                              path: 'mood>/past/2'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                          }" />
+            <Slider value="{mood>/past/2}" min="{mood>/min}" max="{mood>/max}" />
+            
+            <Label text="{
+                            parts: [{
+                              path: 'i18n>logMoodLabelStepsWed'
+                            }, {
+                              path: 'mood>/past/3'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                          }" />
+            <Slider value="{mood>/past/3}" min="{mood>/min}" max="{mood>/max}" />
+          
+            <Label text="{
+                            parts: [{
+                              path: 'i18n>logMoodLabelStepsThu'
+                            }, {
+                              path: 'mood>/past/4'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                          }" />
+            <Slider value="{mood>/past/4}" min="{mood>/min}" max="{mood>/max}" />
+            
+            <Label text="{
+                            parts: [{
+                              path: 'i18n>logMoodLabelStepsFri'
+                            }, {
+                              path: 'mood>/past/5'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                          }" />
+            <Slider value="{mood>/past/5}" min="{mood>/min}" max="{mood>/max}" />
+          
+            <Label text="{
+                            parts: [{
+                              path: 'i18n>logMoodLabelStepsSat'
+                            }, {
+                              path: 'mood>/past/6'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                          }" />
+            <Slider value="{mood>/past/6}" min="{mood>/min}" max="{mood>/max}" />
+          </content>
+        </Panel>
+          </f:content>
+        </f:SimpleForm>
+      </content>
+    </Page>
+</core:View>

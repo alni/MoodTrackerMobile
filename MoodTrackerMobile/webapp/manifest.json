@@ -1,0 +1,131 @@
+{
+  "_version": "@@version",
+  "sap.app": {
+    "_version": "@@version",
+    "id": "mood_tracker",
+    "type": "application",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": {
+      "version": "@@version"
+    },
+    "ach": "CA-UI5-DOC"
+  },
+  "sap.ui": {
+    "_version": "@@version",
+    "technology": "UI5",
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    },
+    "supportedThemes": [
+      "sap_bluecrystal"
+    ]
+  },
+  "sap.ui5": {
+    "_version": "@@version",
+    "rootView": "mood_tracker.view.App",
+    "name": "Mood Tracker",
+    "version": "1.0.0",
+    "resources": {
+        "js": [],
+        "css": [
+            {
+                "uri": "css/index.css"
+            }
+        ]
+    },
+    "dependencies": {
+      "minUI5Version": "1.32",
+      "libs": {
+        "sap.m": { },
+        "sap.ui.layout": {}
+      }
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "mood_tracker.i18n.messagebundle"
+        }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "mood_tracker.MyRouter",
+        "viewType": "XML",
+        "viewPath": "mood_tracker.view",
+        "controlId": "idAppControl",
+        "transition": "slide",
+        "bypassed": {
+          "target": [
+            "master",
+            "notFound"
+          ]
+        },
+        "targetAggregation": "detailPages"
+      },
+      "targets": {
+        "logMoodView": {
+          "viewName": "detail.LogMood",
+          "viewLevel": 1,
+          "controlAggregation": "detailPages"
+        },
+        "reviewMoodView": {
+          "viewName": "detail.ReviewMood",
+          "viewLevel": 1,
+          "controlAggregation": "detailPages"
+        },
+        "notFound": {
+          "viewName": "NotFound",
+          "viewLevel": 3,
+          "controlAggregation": "detailPages"
+        },
+        "home": {
+          "viewName": "detail.Home",
+          "viewLevel": 1,
+          "controlAggregation": "detailPages"
+        },
+        "settings": {
+          "viewName": "detail.SettingsForm",
+          "viewLevel": 0,
+          "controlAggregation": "detailPages"
+        },
+        "master": {
+          "viewName": "Master",
+          "viewLevel": 1,
+          "controlAggregation": "masterPages"
+        }
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "master",
+          "target": ["home", "master"],
+          "subroutes": [
+            {
+              "target": "home",
+              "targetAggregation": "detailPages"
+            },
+            {
+              "pattern": "page.home",
+              "name": "home",
+              "target": "home"
+            },
+            {
+              "pattern": "page.logMood",
+              "name": "logMood",
+              "target": "logMoodView"
+            },
+            {
+              "pattern": "page.reviewMood",
+              "name": "reviewMood",
+              "target": "reviewMoodView"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
