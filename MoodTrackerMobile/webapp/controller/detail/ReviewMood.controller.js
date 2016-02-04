@@ -54,6 +54,9 @@ sap.ui.define([
                         activePoint.strokeColor = activePoint.highlightStroke;
                         console.log(activePoint);
                         if (activePoint.datasetLabel && activePoint.label) {
+                            /*CUSTOM CODE*/
+                            // Only add active points that has a dataset label
+                            // AND a label set to a value
                             _activePoints.push(activePoint);
                         } else {
                         }
@@ -130,6 +133,7 @@ sap.ui.define([
                                 xPositions.push(element.x);
                                 yPositions.push(element.y);
 
+                                /*CUSTOM CONDITION*/
                                 // Only show tooltips for elements with a
                                 // datasetLabel and a label
                                 if (element.datasetLabel && element.label) {
