@@ -75,7 +75,7 @@
           <Label text="{i18n>logMoodLabelSteps}" />
           <Slider value="{mood>/current}" min="{mood>/min}" max="{mood>/max}" change="onCurrentMoodChange" />
           <Label text="{i18n>logMoodLabelPast}" />
-          <Panel expandable="true" expanded="false" headerText="{i18n>logMoodPastPanelHeaderText}" width="auto" class="sapUiResponsiveMargin"
+          <Panel id="pastPanel" expandable="true" expanded="false" headerText="{i18n>logMoodPastPanelHeaderText}" width="auto" class="sapUiResponsiveMargin"
                content="{mood>/past}">
             <content>
               <f:SimpleForm maxContainerCols="2"

@@ -29,9 +29,10 @@
 
 sap.ui.define([
     "jquery.sap.global",
+    "sap/ui/model/Sorter",
     "mood_tracker/controller/BaseController",
     "mood_tracker/model/Mood"
-], function ($, BaseController, MoodModel) {
+], function ($, Sorter, BaseController, MoodModel) {
     "use strict";
 
     var LogMood = BaseController.extend("mood_tracker.controller.detail.LogMood", {
@@ -48,10 +49,44 @@ sap.ui.define([
         },
 
         updateLogMood: function () {
-            var oView = this.getView();
+            var oView = this.getView(),
+                oPastPanel = oView.byId("pastPanel"),
+                oSorter = new Sorter("mood>day");
             //sap.ui.core.UIComponent.getRouterFor(this).attachRouteMatched(this.onRouteMatched, this);
 
             var model = oView.getModel("mood");
+
+            var days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+                todayDay = new Date().getDay();
+
+            var currentDay = new Date().getDay() + 1;
+
+            if (currentDay > 6) {
+                currentDay = 0;
+            }
+            var dayShift = -currentDay;
+
+            oSorter.fnCompare = function (value1, value2) {
+                console.log(value1);
+                var day1 = days.indexOf(value1.toUpperCase()) + dayShift;
+                var day2 = days.indexOf(value2.toUpperCase()) + dayShift;
+                console.log(todayDay + " = " + day1 + " | " + day2);
+                if (day1 < 0) {
+                    day1 += 7;
+                } else if (day1 > 6) {
+                    day1 -= 7;
+                }
+                if (day2 < 0) {
+                    day2 += 7;
+                } else if (day2 > 6) {
+                    day2 -= 7;
+                }
+                if (day2 < day1) return -1;
+                if (day2 == day1) return 0;
+                if (day2 > day1) return 1;
+            };
+
+            oPastPanel.getBinding("content").sort(oSorter);
         },
 
         onCurrentMoodChange: function (oEvent) {

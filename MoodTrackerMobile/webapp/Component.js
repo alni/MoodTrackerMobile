@@ -102,7 +102,7 @@ sap.ui.define([
             console.log(past);
 
             var moodModel = new JSONModel({
-                current: moods[new Date().getDay()],
+                current: past[new Date().getDay()].value,
                 past: past, //moods, //[-3, 2, 5, 0, 10, 1, -10]
                 min: MoodModel.readValue("moodMin", -10),
                 max: MoodModel.readValue("moodMax", 10)
