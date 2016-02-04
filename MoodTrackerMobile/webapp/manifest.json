@@ -105,10 +105,6 @@
           "target": ["home", "master"],
           "subroutes": [
             {
-              "target": "home",
-              "targetAggregation": "detailPages"
-            },
-            {
               "pattern": "page.home",
               "name": "home",
               "target": "home"

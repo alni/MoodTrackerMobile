@@ -151,8 +151,12 @@ sap.ui.define([
     		return bValue ? false : true;
     	},
     	median: function (values) {
-    	    var _values = [].concat(values);
-    	    _values.sort(function (a, b) { return a - b; });
+    	    var _values = [].concat(values.map(function (item, i) {
+    	        return $.isNumeric(item) ? item : item.value;
+    	    }));
+    	    _values.sort(function (a, b) {
+    	        return a - b;
+    	    });
 
     	    var half = Math.floor(values.length / 2);
 
@@ -164,7 +168,10 @@ sap.ui.define([
     	},
     	average: function (values) {
     	    var value = 0;
-    	    $.each(values, function (index, val) {
+    	    var _values = [].concat(values.map(function (item, i) {
+    	        return $.isNumeric(item) ? item : item.value;
+    	    }));
+    	    $.each(_values, function (index, val) {
     	        value += val;
     	    });
     	    return Math.round( value / values.length );
