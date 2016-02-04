@@ -62,7 +62,10 @@ module.exports = function (grunt) {
                 files: [
                     // Delete all files (_only_ files)
                     {
-                        src: ['<%= dir.dist %>/**'],
+                        src: [
+                            '<%= dir.dist %>/**',
+                            '!<%= dir.dist %>/keepme.txt'
+                        ],
                         filter: 'isFile'
                     },
                     // Delete some specific directories (and all their contents)
