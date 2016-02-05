@@ -247,10 +247,11 @@ sap.ui.define([
 
             var model = oView.getModel("mood");
             console.log(oView.getModel("mood"));
-            var data5 = model.getData();
+            var data = model.getData();
             if (updateOnly) {
                 if (this.oLineChart) {
-                    this.updateChart(data5.past, this.oLineChart, data5.min, data5.max);
+                    this.updateChart(data.past, this.oLineChart,
+                        data.min, data.max, data.average, data.median);
                 }
             } else {
                 var lineChartHtml = oView.byId("lineChartHtml");
@@ -266,7 +267,8 @@ sap.ui.define([
                         this.oLineChart.destroy();
                     }
                     if (ctx) {
-                        this.oLineChart = this.createChart(data5.past, ctx, data5.min, data5.max);
+                        this.oLineChart = this.createChart(data.past, ctx,
+                            data.min, data.max, data.average, data.median);
                         this.oLineChart.update();
                     }
                     window.oLineChart = this.oLineChart;
@@ -315,7 +317,7 @@ sap.ui.define([
             return localeData.getDays("abbreviated");
         },
 
-        createChart: function (inputData, ctx, min, max) {
+        createChart: function (inputData, ctx, min, max, avg, med) {
             var sFillColor = this.getThemingParameter("sapUiMediumBG");
             var sStrokeColor = this.getThemingParameter("sapUiChart4");
             var sGoodColor = this.getThemingParameter("sapUiChartGood");
@@ -335,6 +337,8 @@ sap.ui.define([
                 console.log(item);
                 return item.value;   
             }), dayShift);
+            var average = $.isNumeric(avg) ? avg : Formatter.average(outputData),
+                median = $.isNumeric(med) ? med : Formatter.median(outputData);
             console.log(outputData);
             var moodAreasData = this.createMoodAreaDatasets(min, max);
             var realMax = Math.max.apply(null, outputData);
@@ -394,8 +398,7 @@ sap.ui.define([
                         pointStrokeColor: "transparent",
                         pointHighlightFill: "transparent",
                         pointHighlightStroke: "transparent",
-                        data: this.createFlatDataSet(Formatter.average(outputData))
-                            .concat(Formatter.average(outputData))
+                        data: this.createFlatDataSet(average).concat(average)
                     },
                     {
                         label: sReviewMoodChartLabelMedian, //"Median",
@@ -405,8 +408,7 @@ sap.ui.define([
                         pointStrokeColor: "transparent",
                         pointHighlightFill: "transparent",
                         pointHighlightStroke: "transparent",
-                        data: this.createFlatDataSet(Formatter.median(outputData))
-                            .concat(Formatter.median(outputData))
+                        data: this.createFlatDataSet(median).concat(median)
                     },
                     {
                         label: sReviewMoodChartLabelMood, //"Mood",
@@ -463,7 +465,7 @@ sap.ui.define([
             });
         },
 
-        updateChart: function (inputData, oLineChart, min, max) {
+        updateChart: function (inputData, oLineChart, min, max, avg, med) {
             console.log(oLineChart.datasets);
             var lastDataset = oLineChart.datasets.length - 1;
 
@@ -493,14 +495,14 @@ sap.ui.define([
             var outputData = this.createDataSet(inputData.map(function(item, index) {
                 return item.value;   
             }), dayShift);
-            var average = this.createFlatDataSet(Formatter.average(outputData))
-                .concat(Formatter.average(outputData));
-            var median = this.createFlatDataSet(Formatter.median(outputData))
-                .concat(Formatter.median(outputData));
-            $.each(average, function (index, item) {
+            var average = $.isNumeric(avg) ? avg : Formatter.average(outputData),
+                median = $.isNumeric(med) ? med : Formatter.median(outputData);
+            var averageDataSet = this.createFlatDataSet(average).concat(average);
+            var medianDataSet = this.createFlatDataSet(median).concat(median);
+            $.each(averageDataSet, function (index, item) {
                 oLineChart.datasets[lastDataset - 2].points[index].value = item;
             });
-            $.each(median, function (index, item) {
+            $.each(medianDataSet, function (index, item) {
                 oLineChart.datasets[lastDataset - 1].points[index].value = item;
             });
             $.each(outputData, function (index, item) {
