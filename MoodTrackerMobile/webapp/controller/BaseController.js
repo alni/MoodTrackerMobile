@@ -91,9 +91,10 @@ sap.ui.define([
          * @return {string} - the localized text
          */
         getLocalizedText : function(sKey, aArgs, bCacheResult, sFallback) {
-            var text = this.oLocalizedTextCache[sKey];
+            var text = this.oLocalizedTextCache[sKey],
+                oModel;
             if (!this.oBundle) {
-                var oModel = this.getView().getModel("i18n");
+                oModel = this.getView().getModel("i18n");
                 this.oBundle = oModel && oModel.getResourceBundle();
             }
             if (!bCacheResult || !text) {
@@ -150,8 +151,8 @@ sap.ui.define([
         },
 
         getRouteHash : function(sRouteName) {
-            var _router = sap.ui.core.UIComponent.getRouterFor(this);
-            var url = _router.getURL(sRouteName);
+            var _router = sap.ui.core.UIComponent.getRouterFor(this),
+                url = _router.getURL(sRouteName);
             if (url) {
                 return "#/" + url;
             }
@@ -172,9 +173,9 @@ sap.ui.define([
          * @param  {sap.ui.base.Event} oEvent - the event object
          */
         onExternalLinkPress : function(oEvent) {
-            var source = oEvent.getSource();
-            var href = source.getHref();
-            var target = source.getTarget() || "_blank";
+            var source = oEvent.getSource(),
+                href = source.getHref(),
+                target = source.getTarget() || "_blank";
 
             if (window.cordova && cordova.InAppBrowser) {
                 oEvent.preventDefault();

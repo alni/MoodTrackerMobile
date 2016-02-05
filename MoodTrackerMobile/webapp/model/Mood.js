@@ -35,13 +35,14 @@ sap.ui.define([
 
 
     var isWindowsApp = window.WinJS && WinJS.Utilities && WinJS.Utilities.hasWinRT,
-        applicationData = null;
+        applicationData = null,
+        MoodModel;
 
     if (isWindowsApp) {
         applicationData = Windows.Storage.ApplicationData.current;
     }
 
-    var MoodModel = {
+    MoodModel = {
         storeValue: function (key, value) {
             if (isWindowsApp && applicationData) {
                 var localSettings = applicationData.localSettings;
@@ -51,9 +52,10 @@ sap.ui.define([
             }
         },
         readValue: function (key, value) {
-            var returnValue = value;
+            var returnValue = value,
+                localSettings;
             if (isWindowsApp && applicationData) {
-                var localSettings = applicationData.localSettings;
+                localSettings = applicationData.localSettings;
                 if (localSettings.values[key]) {
                     returnValue = JSON.parse(localSettings.values[key]);
                 }

@@ -50,14 +50,14 @@ sap.ui.define([
         },
 
         onRouteMatched : function(oEvent) {
-            var oList = this.getView().byId("list");
-            var sName = oEvent.getParameter("name");
+            var oList = this.getView().byId("list"),
+                sName = oEvent.getParameter("name");
             console.log(sName);
 
             // Wait for the list to be loaded once
             $.when(this.oUpdateFinishedDeferred).then($.proxy(function() {
                 console.log(sName);
-                var aItems;
+                var aItems, i, id;
 
                 // On the empty hash select the first item
                 if (sName === "main") {
@@ -66,8 +66,8 @@ sap.ui.define([
 
                 // Try to select the item in the list
                 aItems = oList.getItems();
-                for (var i = 0; i < aItems.length; i++) {
-                    var id = aItems[i].getId();
+                for (i = 0; i < aItems.length; i++) {
+                    id = aItems[i].getId();
                     if (id.substr(id.indexOf("--")+2) === sName &&
                         (!oList.getSelectedItem() || oList.getSelectedItem().getId() !== id)) {
                     //if (aItems[i].getBindingContext().getPath() === "/" + oArguments.product) {
@@ -87,8 +87,8 @@ sap.ui.define([
 
         selectDetail : function() {
             if (!sap.ui.Device.system.phone) {
-                var oList = this.getView().byId("list");
-                var aItems = oList.getItems();
+                var oList = this.getView().byId("list"),
+                    aItems = oList.getItems();
                 console.log(aItems);
                 if (aItems.length && !oList.getSelectedItem()) {
                     oList.setSelectedItem(aItems[0], true);
@@ -99,8 +99,8 @@ sap.ui.define([
 
         onSearch : function() {
             // add filter for search
-            var filters = [];
-            var searchString = this.getView().byId("searchField").getValue();
+            var filters = [],
+                searchString = this.getView().byId("searchField").getValue();
             if (searchString && searchString.length > 0) {
                 filters = [ new sap.ui.model.Filter("Name", sap.ui.model.FilterOperator.Contains, searchString) ];
             }
@@ -118,9 +118,10 @@ sap.ui.define([
 
         showDetail : function(oItem) {
             // If we're on a phone, include nav in history; if not, don't.
-            var bReplace = $.device.is.phone ? false : true;
-            var id = oItem.getId().substr(oItem.getId().indexOf("--")+2); //.toLowerCase();
-            var data = {
+            var bReplace = $.device.is.phone ? false : true,
+                id = oItem.getId().substr(oItem.getId().indexOf("--")+2), //.toLowerCase();
+                data;
+            data = {
                 from: "master",
                 product: "page." + id
             };

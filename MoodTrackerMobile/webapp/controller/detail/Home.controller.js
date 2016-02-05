@@ -69,7 +69,8 @@ sap.ui.define([
         updateHome : function() {
             var oView = this.getView(),
                 controller = this,
-                homeWelcomeMessageFile = this.getLocalizedText("homeWelcomeMessageFile");
+                homeWelcomeMessageFile = this.getLocalizedText("homeWelcomeMessageFile"),
+                homeAcknowledgmentsFile = this.getLocalizedText("homeAcknowledgmentsFile");
             $.get(homeWelcomeMessageFile).done(function (result) {
                 var html = Formatter.markdownToHtml(result);
                 oView.byId("homeWelcomeHtml").setContent(
@@ -77,7 +78,6 @@ sap.ui.define([
                     html +
                 "</div>");
             });
-            var homeAcknowledgmentsFile = this.getLocalizedText("homeAcknowledgmentsFile");
             $.get(homeAcknowledgmentsFile).done(function (result) {
                 var html = Formatter.markdownToHtml(result);
                 oView.getModel("home").getData().AcknowledgmentsMessage = html;
@@ -85,8 +85,8 @@ sap.ui.define([
             });
         },
         handleAcknowledgmentsClick : function(oEvent) {
-            var _oPopoverName = "oAcknowledgmentsPopover";
-            var fragmentPath = "dialog.home.AcknowledgmentsPopover";
+            var _oPopoverName = "oAcknowledgmentsPopover",
+                fragmentPath = "dialog.home.AcknowledgmentsPopover";
             if (!this[_oPopoverName]) {
                 this[_oPopoverName] = this.getFragment(_oPopoverName, fragmentPath, this);
                 //sap.ui.xmlfragment(fragmentPath, this);

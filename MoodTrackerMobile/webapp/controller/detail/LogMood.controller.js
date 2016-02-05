@@ -38,8 +38,8 @@ sap.ui.define([
 
     var LogMood = BaseController.extend("mood_tracker.controller.detail.LogMood", {
         onInit : function() {
-            var oView = this.getView();
-            var controller = this;
+            var oView = this.getView(),
+                controller = this;
             //Helpers.applyUiSizeClass(oView);
             oView.attachAfterRendering(this.updateLogMood, this);
             oView.addEventDelegate({
@@ -52,26 +52,21 @@ sap.ui.define([
         updateLogMood: function () {
             var oView = this.getView(),
                 oPastPanel = oView.byId("pastPanel"),
-                oSorter = new Sorter("mood>day");
+                oSorter = new Sorter("mood>day"),
+                model = oView.getModel("mood"),
+                days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+                currentDay = new Date().getDay() + 1,
+                dayShift;
             //sap.ui.core.UIComponent.getRouterFor(this).attachRouteMatched(this.onRouteMatched, this);
-
-            var model = oView.getModel("mood");
-
-            var days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
-                todayDay = new Date().getDay();
-
-            var currentDay = new Date().getDay() + 1;
 
             if (currentDay > 6) {
                 currentDay = 0;
             }
-            var dayShift = -currentDay;
+            dayShift = -currentDay;
 
             oSorter.fnCompare = function (value1, value2) {
-                console.log(value1);
-                var day1 = days.indexOf(value1.toUpperCase()) + dayShift;
-                var day2 = days.indexOf(value2.toUpperCase()) + dayShift;
-                console.log(todayDay + " = " + day1 + " | " + day2);
+                var day1 = days.indexOf(value1.toUpperCase()) + dayShift,
+                    day2 = days.indexOf(value2.toUpperCase()) + dayShift;
                 if (day1 < 0) {
                     day1 += 7;
                 } else if (day1 > 6) {

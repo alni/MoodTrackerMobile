@@ -48,13 +48,6 @@ sap.ui.define([
             });
         },
 
-        updateLogMood: function () {
-            var oView = this.getView();
-            //sap.ui.core.UIComponent.getRouterFor(this).attachRouteMatched(this.onRouteMatched, this);
-
-            var model = oView.getModel("mood");
-        },
-
         updateMood: function (oEvent) {
             var oView = this.getView(),
                 oSource = oEvent.getSource(),

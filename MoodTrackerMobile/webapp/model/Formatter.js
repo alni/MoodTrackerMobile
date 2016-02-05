@@ -35,7 +35,8 @@ sap.ui.define([
 
 
     var localizedValue = null,
-        formattedValue = null;
+        formattedValue = null,
+        Formatter;
 
     localizedValue = function (value, bundleText, _this) {
         var oModel = _this.getModel("i18n"),
@@ -53,7 +54,7 @@ sap.ui.define([
         return localizedValue;
     };
 
-    var Formatter = {
+    Formatter = {
         formattedValue : function() {
             var args = [].concat($.makeArray(arguments));
             console.log(args);
@@ -64,9 +65,8 @@ sap.ui.define([
             return localizedValue(value, bundleText, this);
         },
         localizedFormattedValue: function () {
-            var args = [].concat($.makeArray(arguments));
-            console.log(args);
-            var _val = formattedValue(
+            var args = [].concat($.makeArray(arguments)),
+                _val = formattedValue(
                 localizedValue(args[0], args[1], this),
                 args.slice(2, args.length), this);
             return _val;
@@ -85,13 +85,14 @@ sap.ui.define([
             }
         },
         markdownToHtml: function (sStr) {
-            var $html = $("<div/>");
+            var $html = $("<div/>"),
+                // Style the links with the current theme colour for links
+                sLinkColor = sap.ui.core.theming.Parameters.get("sapUiLink");
             $html.html(marked(sStr));
             $html.find("a").filter(function() {
                return this.hostname && this.hostname !== location.hostname;
             }).attr("target", "_blank");
-            // Style the links with the current theme colour for links
-            var sLinkColor = sap.ui.core.theming.Parameters.get("sapUiLink");
+            
             $html.find("a").css("color", sLinkColor);
             return $html.html();
         },
@@ -151,14 +152,15 @@ sap.ui.define([
     		return bValue ? false : true;
     	},
     	median: function (values) {
-    	    var _values = [].concat(values.map(function (item, i) {
+    	    var half,
+                _values = [].concat(values.map(function (item, i) {
     	        return $.isNumeric(item) ? item : item.value;
     	    }));
     	    _values.sort(function (a, b) {
     	        return a - b;
     	    });
 
-    	    var half = Math.floor(values.length / 2);
+    	    half = Math.floor(values.length / 2);
 
     	    if (_values.length % 2) {
     	        return _values[half];
@@ -167,8 +169,8 @@ sap.ui.define([
     	    }
     	},
     	average: function (values) {
-    	    var value = 0;
-    	    var _values = [].concat(values.map(function (item, i) {
+    	    var value = 0,
+                _values = [].concat(values.map(function (item, i) {
     	        return $.isNumeric(item) ? item : item.value;
     	    }));
     	    $.each(_values, function (index, val) {
@@ -177,13 +179,14 @@ sap.ui.define([
     	    return Math.round( value / values.length );
     	},
     	makeStringsSameLength: function () {
-    	    var args = $.makeArray(arguments);
-    	    var longest = args.sort(function (a, b) { return b.length - a.length; })[0];
-    	    var l = longest.length;
+    	    var args = $.makeArray(arguments),
+                longest = args.sort(function (a, b) { return b.length - a.length; })[0],
+    	        l = longest.length;
     	    $.each(args, function (index, str) {
-    	        var _l = str.length;
+    	        var _l = str.length,
+    	            i;
     	        if (_l < l) {
-    	            for (var i = 0; i < l - _l; i++) {
+    	            for (i = 0; i < l - _l; i++) {
     	                args[index] += " ";
     	            }
     	        }
