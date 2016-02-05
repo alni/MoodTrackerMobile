@@ -60,6 +60,11 @@ sap.ui.define([
             console.log(args);
             return formattedValue(args[0], args.slice(1, args.length), this);
         },
+        formattedMessage: function () {
+            var args = [].concat($.makeArray(arguments));
+            console.log(args);
+            return $.sap.formatMessage(args[0], args.slice(1, args.length));
+        },
         localizedValue: function (value, bundleText) {
             console.log(value + " | " + bundleText);
             return localizedValue(value, bundleText, this);
@@ -69,6 +74,13 @@ sap.ui.define([
                 _val = formattedValue(
                 localizedValue(args[0], args[1], this),
                 args.slice(2, args.length), this);
+            return _val;
+        },
+        localizedFormattedMessage: function () {
+            var args = [].concat($.makeArray(arguments)),
+                _val = Formatter.formattedMessage(
+                localizedValue(args[0], args[1], this),
+                args.slice(2, args.length));
             return _val;
         },
         categoryPageTitle : function(customTitle, categoryPageTitle, customTitleFallback) {

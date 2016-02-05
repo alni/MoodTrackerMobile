@@ -68,7 +68,7 @@
                             }, {
                               path: 'mood>/current'
                             }],
-                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                            formatter: 'mood_tracker.model.Formatter.formattedMessage'
                           }"
                           showIcon="true"
                           customIcon="sap-icon://nurse"/>
@@ -97,7 +97,7 @@
                             }, {
                               path: 'mood>value'
                             }],
-                            formatter: 'mood_tracker.model.Formatter.localizedFormattedValue'
+                            formatter: 'mood_tracker.model.Formatter.localizedFormattedMessage'
                           }" />
                   <Slider value="{mood>value}" min="{mood>/min}" max="{mood>/max}" enabled="{mood>editable}">
                     <layoutData>

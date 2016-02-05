@@ -59,7 +59,7 @@
               formatter: 'mood_tracker.model.Formatter.median'
             }" />-->
             <Text text="{
-                  formatter: 'mood_tracker.model.Formatter.formattedValue',
+                  formatter: 'mood_tracker.model.Formatter.formattedMessage',
                   parts: [{
                     path: 'i18n>reviewMoodPageSummaryText'
                   }, {
