@@ -242,30 +242,38 @@ sap.ui.define([
         updateReviewMood: function (updateOnly) {
             console.log(updateOnly);
             //alert("Test");
-            var oView = this.getView();
+            var oView = this.getView(),
+                model = oView.getModel("mood"),
+                data = model.getData(),
+                lineChartHtml, $lineChartHtml, _canvas, ctx;
             //sap.ui.core.UIComponent.getRouterFor(this).attachRouteMatched(this.onRouteMatched, this);
-
-            var model = oView.getModel("mood");
-            console.log(oView.getModel("mood"));
-            var data = model.getData();
+            //console.log(oView.getModel("mood"));
             if (updateOnly) {
                 if (this.oLineChart) {
                     this.updateChart(data.past, this.oLineChart,
                         data.min, data.max, data.average, data.median);
                 }
             } else {
-                var lineChartHtml = oView.byId("lineChartHtml");
-                var $lineChartHtml = $(lineChartHtml.getDomRef());
+                lineChartHtml = oView.byId("lineChartHtml");
+                if (this.oLineChart) {
+                    // Destroy the Line Chart
+                    this.oLineChart.clear().destroy();
+                    //lineChartHtml.setContent("");
+                    // Re-set the content of the Line Chart HTML control to 
+                    // clear the current canvas
+                    lineChartHtml.setContent(["<div class='lineChartHtmlContent'>",
+                        "<canvas width='100%' height='100%'></canvas>",
+                        "</div>"].join(""));
+                    
+                }
+                $lineChartHtml = lineChartHtml.$();//$(lineChartHtml.getDomRef());
                 console.log($lineChartHtml);
-                var ctx;
+                
                 try {
                     ctx = $lineChartHtml.find("canvas").get(0).getContext("2d");
                 } catch (ex) {
-
+                    $.sap.log.error(ex);
                 } finally {
-                    if (this.oLineChart) {
-                        this.oLineChart.destroy();
-                    }
                     if (ctx) {
                         this.oLineChart = this.createChart(data.past, ctx,
                             data.min, data.max, data.average, data.median);
@@ -297,12 +305,13 @@ sap.ui.define([
         },
 
         createMoodAreaDatasets: function (min, max) {
-            var ok_r = 0.65;
-            var bad_r = 0.35;
+            var ok_r = 0.65,
+                bad_r = 0.35,
+                goodMax, okMax, badMax;
 
-            var goodMax = max + 0;
-            var okMax = ok_r * max + (1 - ok_r) * min;
-            var badMax = bad_r * max + (1 - bad_r) * min;
+            goodMax = max + 0;
+            okMax = ok_r * max + (1 - ok_r) * min;
+            badMax = bad_r * max + (1 - bad_r) * min;
 
             return {
                 good: [goodMax].concat(this.createFlatDataSet(null)).concat([goodMax]),
@@ -312,49 +321,48 @@ sap.ui.define([
         },
 
         createDayLabels: function () {
-            var locale = sap.ui.getCore().getConfiguration().getLocale();
-            var localeData = new sap.ui.core.LocaleData(locale);
+            var locale = sap.ui.getCore().getConfiguration().getLocale(),
+                localeData = new sap.ui.core.LocaleData(locale);
             return localeData.getDays("abbreviated");
         },
 
         createChart: function (inputData, ctx, min, max, avg, med) {
-            var sFillColor = this.getThemingParameter("sapUiMediumBG");
-            var sStrokeColor = this.getThemingParameter("sapUiChart4");
-            var sGoodColor = this.getThemingParameter("sapUiChartGood");
-            var sOKColor = this.getThemingParameter("sapUiChartNeutral");
-            var sBadColor = this.getThemingParameter("sapUiChartBad");
-
-            var currentDay = new Date().getDay() + 1;
+            var sFillColor = this.getThemingParameter("sapUiMediumBG"),
+                sStrokeColor = this.getThemingParameter("sapUiChart4"),
+                sGoodColor = this.getThemingParameter("sapUiChartGood"),
+                sOKColor = this.getThemingParameter("sapUiChartNeutral"),
+                sBadColor = this.getThemingParameter("sapUiChartBad"),
+                currentDay = new Date().getDay() + 1,
+                dayShift, outputData,
+                average = $.isNumeric(avg) ? avg : Formatter.average(inputData),
+                median = $.isNumeric(med) ? med : Formatter.median(inputData),
+                moodAreasData = this.createMoodAreaDatasets(min, max),
+                tooltipLabels = Formatter.makeStringsSameLength(
+                    this.getLocalizedText("reviewMoodChartLabelAverage"),
+                    this.getLocalizedText("reviewMoodChartLabelMedian"),
+                    this.getLocalizedText("reviewMoodChartLabelMood")),
+                sReviewMoodChartLabelAverage = tooltipLabels[0],
+                sReviewMoodChartLabelMedian = tooltipLabels[1],
+                sReviewMoodChartLabelMood = tooltipLabels[2],
+                labels = this.createDayLabels(),
+                data;
 
             if (currentDay > 6) {
                 currentDay = 0;
             }
-            var dayShift = -currentDay;
+            dayShift = -currentDay;
 
-            
-
-            var outputData = this.createDataSet(inputData.map(function (item, index) {
+            outputData = this.createDataSet(inputData.map(function (item, index) {
                 console.log(item);
                 return item.value;   
             }), dayShift);
-            var average = $.isNumeric(avg) ? avg : Formatter.average(outputData),
-                median = $.isNumeric(med) ? med : Formatter.median(outputData);
             console.log(outputData);
-            var moodAreasData = this.createMoodAreaDatasets(min, max);
             var realMax = Math.max.apply(null, outputData);
             if (realMax < moodAreasData.good[0]) {
                 //moodAreasData.good = this.createFlatDataSet(realMax);
             }
             console.log(moodAreasData);
-            var tooltipLabels = Formatter.makeStringsSameLength(
-                this.getLocalizedText("reviewMoodChartLabelAverage"),
-                this.getLocalizedText("reviewMoodChartLabelMedian"),
-                this.getLocalizedText("reviewMoodChartLabelMood"));
-            var sReviewMoodChartLabelAverage = tooltipLabels[0],
-                sReviewMoodChartLabelMedian = tooltipLabels[1],
-                sReviewMoodChartLabelMood = tooltipLabels[2];
-            var labels = this.createDayLabels(); //["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            var data = {
+            data = {
                 labels: this.createDataSet(labels, dayShift),
                 datasets: [
                     {
@@ -467,16 +475,21 @@ sap.ui.define([
 
         updateChart: function (inputData, oLineChart, min, max, avg, med) {
             console.log(oLineChart.datasets);
-            var lastDataset = oLineChart.datasets.length - 1;
-
-            var currentDay = new Date().getDay() + 1;
+            var lastDataset = oLineChart.datasets.length - 1,
+                currentDay = new Date().getDay() + 1,
+                dayShift,
+                moodAreasData = this.createMoodAreaDatasets(min, max),
+                outputData,
+                average = $.isNumeric(avg) ? avg : Formatter.average(inputData),
+                median = $.isNumeric(med) ? med : Formatter.median(inputData),
+                averageDataSet = this.createFlatDataSet(average).concat(average),
+                medianDataSet = this.createFlatDataSet(median).concat(median);
 
             if (currentDay > 6) {
                 currentDay = 0;
             }
-            var dayShift = -currentDay;
+            dayShift = -currentDay;
 
-            var moodAreasData = this.createMoodAreaDatasets(min, max);
             var realMax = Math.max.apply(null, inputData);
             if (realMax < moodAreasData.good[0]) {
                 //moodAreasData.good = this.createFlatDataSet(realMax);
@@ -492,13 +505,10 @@ sap.ui.define([
                 oLineChart.datasets[2].points[index].value = item;
             });
 
-            var outputData = this.createDataSet(inputData.map(function(item, index) {
+            outputData = this.createDataSet(inputData.map(function(item, index) {
                 return item.value;   
             }), dayShift);
-            var average = $.isNumeric(avg) ? avg : Formatter.average(outputData),
-                median = $.isNumeric(med) ? med : Formatter.median(outputData);
-            var averageDataSet = this.createFlatDataSet(average).concat(average);
-            var medianDataSet = this.createFlatDataSet(median).concat(median);
+
             $.each(averageDataSet, function (index, item) {
                 oLineChart.datasets[lastDataset - 2].points[index].value = item;
             });
