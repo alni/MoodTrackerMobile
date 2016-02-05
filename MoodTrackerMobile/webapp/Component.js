@@ -29,11 +29,12 @@
 sap.ui.define([
     "jquery.sap.global",
     "sap/ui/core/UIComponent",
+    "sap/ui/Device",
     "sap/ui/model/json/JSONModel",
     "mood_tracker/MyRouter",
     "mood_tracker/model/Formatter",
     "mood_tracker/model/Mood"
-], function ($, UIComponent, JSONModel, MyRouter, Formatter, MoodModel) {
+], function ($, UIComponent, Device, JSONModel, MyRouter, Formatter, MoodModel) {
     "use strict";
     /**
      * @class mood_tracker.Component
@@ -76,14 +77,14 @@ sap.ui.define([
 
             // set device model
             var deviceModel = new JSONModel({
-                isTouch: sap.ui.Device.support.touch,
-                isNoTouch: !sap.ui.Device.support.touch,
-                isPhone: sap.ui.Device.system.phone,
-                isNoPhone: !sap.ui.Device.system.phone,
-                listMode: sap.ui.Device.system.phone ? "None" : "SingleSelectMaster",
-                listBackgroundDesign: sap.ui.Device.system.phone ? "Translucent" : "Translucent",
-                listItemType: sap.ui.Device.system.phone ? "Active" : "Inactive",
-                uiSizeClass: sap.ui.Device.support.touch ? "sapUiSizeCozy" : "sapUiSizeCompact",
+                isTouch: Device.support.touch,
+                isNoTouch: !Device.support.touch,
+                isPhone: Device.system.phone,
+                isNoPhone: !Device.system.phone,
+                listMode: Device.system.phone ? "None" : "SingleSelectMaster",
+                listBackgroundDesign: Device.system.phone ? "Translucent" : "Translucent",
+                listItemType: Device.system.phone ? "Active" : "Inactive",
+                uiSizeClass: Device.support.touch ? "sapUiSizeCozy" : "sapUiSizeCompact",
                 isCordova: !!window.cordova
             });
             deviceModel.setDefaultBindingMode("OneWay");
@@ -118,6 +119,20 @@ sap.ui.define([
                 //$("#splash-screen").remove();
             //});
 
+            document.addEventListener('pause', this.onWindowUnload.bind(this), false);
+
+        },
+        onWindowBeforeUnload: function () {
+            //var oModel = this.getModel("i18n"),
+            //    oBundle = oModel && oModel.getResourceBundle();
+            //return oBundle ? oBundle.getText("appExitMessage")
+            //    : "Are you sure you want to exit the application?";
+        },
+        onWindowUnload: function () {
+            var oModel = this.getModel("mood");
+            MoodModel.storeValue("moods", oModel.getProperty("/past"));
+            MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
+            MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
         }
     });
     return Component;
