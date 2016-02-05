@@ -51,12 +51,22 @@
       <subHeader>
         <Bar>
           <contentMiddle>
-            <Text text="A: {
+            <!--<Text text="A: {
               path: 'mood>/past',
               formatter: 'mood_tracker.model.Formatter.average'
             } | M: {
               path: 'mood>/past',
               formatter: 'mood_tracker.model.Formatter.median'
+            }" />-->
+            <Text text="{
+                  formatter: 'mood_tracker.model.Formatter.formattedValue',
+                  parts: [{
+                    path: 'i18n>reviewMoodPageSummaryText'
+                  }, {
+                    path: 'mood>/average'
+                  }, {
+                    path: 'mood>/median'
+                  }]
             }" />
           </contentMiddle>
         </Bar>

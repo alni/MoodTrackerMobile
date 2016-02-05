@@ -31,8 +31,9 @@ sap.ui.define([
     "jquery.sap.global",
     "sap/ui/model/Sorter",
     "mood_tracker/controller/BaseController",
+    "mood_tracker/model/Formatter",
     "mood_tracker/model/Mood"
-], function ($, Sorter, BaseController, MoodModel) {
+], function ($, Sorter, BaseController, Formatter, MoodModel) {
     "use strict";
 
     var LogMood = BaseController.extend("mood_tracker.controller.detail.LogMood", {
@@ -100,8 +101,11 @@ sap.ui.define([
 
         saveMood: function () {
             var oView = this.getView(),
-                oModel = oView.getModel("mood");
-            MoodModel.storeValue("moods", oModel.getProperty("/past"));
+                oModel = oView.getModel("mood"),
+                past = oModel.getProperty("/past");
+            oModel.setProperty("/average", Formatter.average(past));
+            oModel.setProperty("/median", Formatter.median(past));
+            MoodModel.storeValue("moods", past);
         }
     });
 

@@ -105,7 +105,9 @@ sap.ui.define([
                 current: past[new Date().getDay()].value,
                 past: past, //moods, //[-3, 2, 5, 0, 10, 1, -10]
                 min: MoodModel.readValue("moodMin", -10),
-                max: MoodModel.readValue("moodMax", 10)
+                max: MoodModel.readValue("moodMax", 10),
+                average: Formatter.average(past),
+                median: Formatter.median(past)
             });
             this.setModel(moodModel, "mood");
 
