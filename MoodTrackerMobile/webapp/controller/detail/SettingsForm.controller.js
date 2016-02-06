@@ -72,6 +72,7 @@ sap.ui.define([
                 oModel = oView.getModel("mood");
             MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
             MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
+            MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
         },
 
         onNavBack: function () {
