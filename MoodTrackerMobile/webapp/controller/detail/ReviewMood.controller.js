@@ -277,6 +277,8 @@ sap.ui.define([
                     if (ctx) {
                         this.oLineChart = this.createChart(data.past, ctx,
                             data.min, data.max, data.average, data.median);
+                        this.updateChart(data.past, this.oLineChart,
+                            data.min, data.max, data.average, data.median);
                         this.oLineChart.update();
                     }
                     window.oLineChart = this.oLineChart;
@@ -343,7 +345,7 @@ sap.ui.define([
                     this.getLocalizedText("reviewMoodChartLabelMood")),
                 sReviewMoodChartLabelAverage = tooltipLabels[0],
                 sReviewMoodChartLabelMedian = tooltipLabels[1],
-                sReviewMoodChartLabelMood = tooltipLabels[2],
+                sReviewMoodChartLabelMood = tooltipLabels[2].trim(),
                 labels = this.createDayLabels(),
                 data;
 
@@ -467,7 +469,7 @@ sap.ui.define([
                 // String - Tooltip label font declaration for the scale label
                 tooltipFontFamily: "monospace",
 
-                multiTooltipTemplate: "<%if (datasetLabel){%><%=datasetLabel%>: <%}%><%= value %>",
+                multiTooltipTemplate: "<%if (datasetLabel){%><%=datasetLabel%>: <%}%><%= value %> <%if (average){%>(<%= ((value / average) * 100).toFixed(0)  %>%)<%}%>",
                 //String - A legend template
                 legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
             });
@@ -511,14 +513,21 @@ sap.ui.define([
 
             $.each(averageDataSet, function (index, item) {
                 oLineChart.datasets[lastDataset - 2].points[index].value = item;
+                oLineChart.datasets[lastDataset - 2].points[index].average = null;
+                oLineChart.datasets[lastDataset - 2].points[index].median = null;
             });
             $.each(medianDataSet, function (index, item) {
                 oLineChart.datasets[lastDataset - 1].points[index].value = item;
+                oLineChart.datasets[lastDataset - 1].points[index].average = null;
+                oLineChart.datasets[lastDataset - 1].points[index].median = null;
             });
             $.each(outputData, function (index, item) {
                 oLineChart.datasets[lastDataset].points[index].value = item;
+                oLineChart.datasets[lastDataset].points[index].average = average;
+                oLineChart.datasets[lastDataset].points[index].median = median;
             });
             oLineChart.update();
+            console.log(oLineChart.datasets);
 
 
         },
