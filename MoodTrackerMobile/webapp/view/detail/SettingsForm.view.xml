@@ -95,6 +95,7 @@
                 <l:GridData span="L1 M1 S2" />
               </layoutData>
             </Button>
+            <!-- /Mood Min -->
             <!-- Mood Max -->
             <Label text="{
                             parts: [{
@@ -127,6 +128,18 @@
                 <l:GridData span="L1 M1 S2" />
               </layoutData>
             </Button>
+            <!-- /Mood Max-->
+            <!-- Mood Step -->
+            <Label text="{
+                            parts: [{
+                              path: 'i18n>settingsFormLabelMoodStep'
+                            }, {
+                              path: 'mood>/step'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.formattedValue'
+                          }" />
+            <Slider id="moodStep" value="{mood>/step}" min="1" max="10" step="1" />
+            <!-- /Mood Step -->
           </f:content>
         </f:SimpleForm>
       </content>

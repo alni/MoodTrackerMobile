@@ -73,7 +73,7 @@
                           showIcon="true"
                           customIcon="sap-icon://nurse"/>
           <Label text="{i18n>logMoodLabelSteps}" />
-          <Slider value="{mood>/current}" min="{mood>/min}" max="{mood>/max}" change="onCurrentMoodChange" />
+          <Slider value="{mood>/current}" min="{mood>/min}" max="{mood>/max}" step="{mood>/step}" change="onCurrentMoodChange" />
           <Label text="{i18n>logMoodLabelPast}" />
           <Panel id="pastPanel" expandable="true" expanded="false" headerText="{i18n>logMoodPastPanelHeaderText}" width="auto" class="sapUiResponsiveMargin"
                content="{mood>/past}">
@@ -99,7 +99,7 @@
                             }],
                             formatter: 'mood_tracker.model.Formatter.localizedFormattedMessage'
                           }" />
-                  <Slider value="{mood>value}" min="{mood>/min}" max="{mood>/max}" enabled="{mood>editable}">
+                  <Slider value="{mood>value}" min="{mood>/min}" max="{mood>/max}" step="{mood>/step}" enabled="{mood>editable}">
                     <layoutData>
                       <l:GridData span="L3 M3 S8" />
                     </layoutData>

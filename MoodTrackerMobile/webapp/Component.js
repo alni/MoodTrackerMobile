@@ -107,6 +107,7 @@ sap.ui.define([
                 past: past, //moods, //[-3, 2, 5, 0, 10, 1, -10]
                 min: MoodModel.readValue("moodMin", -10),
                 max: MoodModel.readValue("moodMax", 10),
+                step: MoodModel.readValue("moodStep", 1),
                 average: Formatter.average(past),
                 median: Formatter.median(past)
             });
@@ -133,6 +134,7 @@ sap.ui.define([
             MoodModel.storeValue("moods", oModel.getProperty("/past"));
             MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
             MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
+            MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
         }
     });
     return Component;
