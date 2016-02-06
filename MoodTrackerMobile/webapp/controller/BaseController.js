@@ -200,6 +200,10 @@ sap.ui.define([
                 }
             });
             controller.aFragmentList = [];
+        },
+
+        isTESTING: function () {
+            return this.getView().getModel("app").getProperty("/TESTING");
         }
     });
 

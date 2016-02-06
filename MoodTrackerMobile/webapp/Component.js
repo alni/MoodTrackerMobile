@@ -50,6 +50,8 @@ sap.ui.define([
             //},
             //rootView: 'mood_tracker.view.App'
         },
+
+        TESTING: false,
         /**
          * Intitalizes the Component and populates the base Models needed for
          * the application to function correctly.
@@ -57,6 +59,8 @@ sap.ui.define([
         init: function () {
             UIComponent.prototype.init.apply(this, arguments);
             var that = this;
+
+            this.TESTING = !!$.sap.getUriParameters().get("TESTING");
             
 
             //var mConfig = this.getMetadata().getConfig();
@@ -69,7 +73,8 @@ sap.ui.define([
                 version: version,
                 lastNotify: -1,
                 notifyDenied: false, // Used with Cordova platforms
-                FullScreenButtonIcon: "sap-icon://full-screen"
+                FullScreenButtonIcon: "sap-icon://full-screen",
+                TESTING: this.TESTING
             });
             this.setModel(appModel, "app");
 
@@ -90,7 +95,8 @@ sap.ui.define([
             deviceModel.setDefaultBindingMode("OneWay");
             this.setModel(deviceModel, "device");
 
-            var moods = MoodModel.readValue("moods", [0, 0, 0, 0, 0, 0, 0]);
+            var moods = this.TESTING ? [7, 8, 7, 7, 5, 6, 5] 
+                : MoodModel.readValue("moods", [0, 0, 0, 0, 0, 0, 0]);
             //[7, 8, 7, 7, 5, 6, 5]; 
 
             var past = moods.map(function (item, i) {
@@ -105,9 +111,9 @@ sap.ui.define([
             var moodModel = new JSONModel({
                 current: past[new Date().getDay()].value,
                 past: past, //moods, //[-3, 2, 5, 0, 10, 1, -10]
-                min: MoodModel.readValue("moodMin", -10),
-                max: MoodModel.readValue("moodMax", 10),
-                step: MoodModel.readValue("moodStep", 1),
+                min: this.TESTING ? 0 : MoodModel.readValue("moodMin", -10),
+                max: this.TESTING ? 10 : MoodModel.readValue("moodMax", 10),
+                step: this.TESTING ? 1 : MoodModel.readValue("moodStep", 1),
                 average: Formatter.average(past),
                 median: Formatter.median(past)
             });
@@ -131,10 +137,12 @@ sap.ui.define([
         },
         onWindowUnload: function () {
             var oModel = this.getModel("mood");
-            MoodModel.storeValue("moods", oModel.getProperty("/past"));
-            MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
-            MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
-            MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
+            if (!this.TESTING) {
+                MoodModel.storeValue("moods", oModel.getProperty("/past"));
+                MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
+                MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
+                MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
+            }
         }
     });
     return Component;

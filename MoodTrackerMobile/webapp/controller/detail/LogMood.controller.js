@@ -100,7 +100,9 @@ sap.ui.define([
                 past = oModel.getProperty("/past");
             oModel.setProperty("/average", Formatter.average(past));
             oModel.setProperty("/median", Formatter.median(past));
-            MoodModel.storeValue("moods", past);
+            if (!this.isTESTING()) {
+                MoodModel.storeValue("moods", past);
+            }
         }
     });
 
