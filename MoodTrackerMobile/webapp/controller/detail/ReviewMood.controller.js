@@ -469,7 +469,16 @@ sap.ui.define([
                 // String - Tooltip label font declaration for the scale label
                 tooltipFontFamily: "monospace",
 
-                multiTooltipTemplate: "<%if (datasetLabel){%><%=datasetLabel%>: <%}%><%= value %> <%if (average){%>(<%= ((value / average) * 100).toFixed(0)  %>%)<%}%>",
+                multiTooltipTemplate: [
+                    "<%if (datasetLabel) { %>",
+                        "<%= datasetLabel %>: ",
+                    "<% } %>",
+                    "<%= value %>", " ",
+                    "<%if (averageCompare) { %>",
+                        "(<%= averageCompare %>%)",
+                    "<% } %>",
+                ].join(""),
+                    //"<%if (datasetLabel){%><%=datasetLabel%>: <%}%><%= value %> <%if (average){%>(<%= ((value / average) * 100).toFixed(0)  %>%)<%}%>",
                 //String - A legend template
                 legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
             });
@@ -513,18 +522,22 @@ sap.ui.define([
 
             $.each(averageDataSet, function (index, item) {
                 oLineChart.datasets[lastDataset - 2].points[index].value = item;
-                oLineChart.datasets[lastDataset - 2].points[index].average = null;
-                oLineChart.datasets[lastDataset - 2].points[index].median = null;
+                oLineChart.datasets[lastDataset - 2].points[index].averageCompare = null;
+                //oLineChart.datasets[lastDataset - 2].points[index].average = null;
+                //oLineChart.datasets[lastDataset - 2].points[index].median = null;
             });
             $.each(medianDataSet, function (index, item) {
                 oLineChart.datasets[lastDataset - 1].points[index].value = item;
-                oLineChart.datasets[lastDataset - 1].points[index].average = null;
-                oLineChart.datasets[lastDataset - 1].points[index].median = null;
+                oLineChart.datasets[lastDataset - 1].points[index].averageCompare = null;
+                //oLineChart.datasets[lastDataset - 1].points[index].average = null;
+                //oLineChart.datasets[lastDataset - 1].points[index].median = null;
             });
             $.each(outputData, function (index, item) {
                 oLineChart.datasets[lastDataset].points[index].value = item;
-                oLineChart.datasets[lastDataset].points[index].average = average;
-                oLineChart.datasets[lastDataset].points[index].median = median;
+                oLineChart.datasets[lastDataset].points[index].averageCompare =
+                    Math.round((item / average) * 100);
+                //oLineChart.datasets[lastDataset].points[index].average = average;
+                //oLineChart.datasets[lastDataset].points[index].median = median;
             });
             oLineChart.update();
             console.log(oLineChart.datasets);
