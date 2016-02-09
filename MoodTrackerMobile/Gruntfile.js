@@ -106,21 +106,24 @@ module.exports = function (grunt) {
                     expand: true,
                     cwd: '<%= dir.bower_components %>/openui5-sap.ui.layout',
                     src: [
-                        'resources/**'
+                        'resources/**',
+                        '!**/*.less'
                     ],
                     dest: '<%= dir.dist %>/'
                 }, {
                     expand: true,
                     cwd: '<%= dir.bower_components %>/openui5-sap.m',
                     src: [
-                        'resources/**'
+                        'resources/**',
+                        '!**/*.less'
                     ],
                     dest: '<%= dir.dist %>/'
                 }, {
                     expand: true,
                     cwd: '<%= dir.bower_components %>/openui5-themelib_sap_bluecrystal',
                     src: [
-                        'resources/**'
+                        'resources/**',
+                        '!**/*.less'
                     ],
                     dest: '<%= dir.dist %>/'
                 }, {
@@ -140,6 +143,28 @@ module.exports = function (grunt) {
             }
         },
 
+        uglify: {
+            options: {
+                sourceMap: true,
+                preserveComments: 'some'
+            },
+            dist: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= dir.dist %>/',
+                    src: [
+                        'controller/**/*.js',
+                        'model/**/*.js',
+                        'scripts/**/*.js',
+                        'util/**/*.js',
+                        'Component.js',
+                        'MyRouter.js'
+                    ],
+                    dest: '<%= dir.dist %>/'
+                }]
+            }
+        },
+
         eslint: {
             webapp: ['<%= dir.webapp %>']
         }
@@ -150,6 +175,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-openui5');
     grunt.loadNpmTasks('grunt-eslint');
 
@@ -162,7 +188,7 @@ module.exports = function (grunt) {
     grunt.registerTask('lint', ['eslint']);
 
     // Build task
-    grunt.registerTask('build', ['openui5_preload', 'copy']);
+    grunt.registerTask('build', ['openui5_preload', 'copy', 'uglify']);
 
     // Default task
     grunt.registerTask('default', [
