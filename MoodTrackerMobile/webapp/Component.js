@@ -33,8 +33,9 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "mood_tracker/MyRouter",
     "mood_tracker/model/Formatter",
-    "mood_tracker/model/Mood"
-], function ($, UIComponent, Device, JSONModel, MyRouter, Formatter, MoodModel) {
+    "mood_tracker/model/Mood",
+    "mood_tracker/util/Helpers"
+], function ($, UIComponent, Device, JSONModel, MyRouter, Formatter, MoodModel, Helpers) {
     "use strict";
     /**
      * @class mood_tracker.Component
@@ -115,7 +116,20 @@ sap.ui.define([
                 max: this.TESTING ? 10 : MoodModel.readValue("moodMax", 10),
                 step: this.TESTING ? 1 : MoodModel.readValue("moodStep", 1),
                 average: Formatter.average(past),
-                median: Formatter.median(past)
+                median: Formatter.median(past),
+                reminder: {
+                    days: this.TESTING ? 1 : MoodModel.readValue("reminderDays", 7),
+                    hours: this.TESTING ?
+                        Helpers.range(0, 23, 1) :
+                        MoodModel.readValue("reminderHours", [10, 14, 18, 22]).sort(),
+                    settings: {
+                        hours: Helpers.range(0, 23, 1).map(function (item, index) {
+                            return {
+                                "value": item
+                            };
+                        })
+                    }
+                },
             });
             this.setModel(moodModel, "mood");
 
@@ -127,6 +141,9 @@ sap.ui.define([
             //});
 
             document.addEventListener('pause', this.onWindowUnload.bind(this), false);
+            
+            Helpers.setupReminders(moodModel,
+                "Remember to log your mood", "Mood Tracker");
 
         },
         onWindowBeforeUnload: function () {
@@ -142,6 +159,9 @@ sap.ui.define([
                 MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
                 MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
                 MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
+
+                MoodModel.storeValue("reminderDays", oModel.getProperty("/reminder/days"));
+                MoodModel.storeValue("reminderHours", oModel.getProperty("/reminder/hours"));
             }
         }
     });

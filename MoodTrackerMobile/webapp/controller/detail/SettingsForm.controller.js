@@ -74,6 +74,9 @@ sap.ui.define([
                 MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
                 MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
                 MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
+
+                MoodModel.storeValue("reminderDays", oModel.getProperty("/reminder/days"));
+                MoodModel.storeValue("reminderHours", oModel.getProperty("/reminder/hours"));
             }
         },
 
