@@ -7,8 +7,8 @@ Med dette programmet kan du:
 * tilpasse minste/største området for humørsjekken
 
 
-Alt dette kan tilpasses fra Oppsettssiden.
+Alt dette kan tilpasses fra Oppsett-siden.
 
-> Vi håper du vil finne denne appen nyttig.  
+> Vi håper du vil finne dette programmet nyttig.  
 > Ha en fin dag videre!  
 > _- Humørsjekken Teamet_

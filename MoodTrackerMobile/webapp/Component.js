@@ -96,41 +96,68 @@ sap.ui.define([
             deviceModel.setDefaultBindingMode("OneWay");
             this.setModel(deviceModel, "device");
 
-            var moods = this.TESTING ? [7, 8, 7, 7, 5, 6, 5] 
-                : MoodModel.readValue("moods", [0, 0, 0, 0, 0, 0, 0]);
-            //[7, 8, 7, 7, 5, 6, 5]; 
+            var moodModel;
+            if (this.TESTING) {
+                moodModel = new JSONModel();
+                moodModel.attachRequestCompleted(function (oEvent) {
+                    var oModel = oEvent.getSource(),
+                        past = oModel.getProperty("/past"),
+                        rsh = oModel.getProperty("/reminder/settings/hours");
+                    past = past.map(function (item, i) {
+                        return $.isNumeric(item) ? {
+                            "value": item,
+                            "editable": false,
+                            "day": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i]
+                        } : item;
+                    });
+                    rsh = rsh.map(function (item, index) {
+                        return {
+                            "value": item
+                        };
+                    });
+                    oModel.setProperty("/current", past[new Date().getDay()].value);
+                    oModel.setProperty("/past", past);
+                    oModel.setProperty("/reminder/settings/hours", rsh);
+                    oModel.refresh(false);
+                    Helpers.setupReminders(oModel,
+                        "Remember to log your mood", "Mood Tracker");
+                }, this);
+                moodModel.loadData("model/sampleData.json");
+            } else {
+                var moods = MoodModel.readValue("moods", [0, 0, 0, 0, 0, 0, 0]);
+                //[7, 8, 7, 7, 5, 6, 5]; 
 
-            var past = moods.map(function (item, i) {
-                return $.isNumeric(item) ? {
-                    "value": item,
-                    "editable": false,
-                    "day": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i]
-                } : item;
-            });
-            console.log(past);
-
-            var moodModel = new JSONModel({
-                current: past[new Date().getDay()].value,
-                past: past, //moods, //[-3, 2, 5, 0, 10, 1, -10]
-                min: this.TESTING ? 0 : MoodModel.readValue("moodMin", -10),
-                max: this.TESTING ? 10 : MoodModel.readValue("moodMax", 10),
-                step: this.TESTING ? 1 : MoodModel.readValue("moodStep", 1),
-                average: Formatter.average(past),
-                median: Formatter.median(past),
-                reminder: {
-                    days: this.TESTING ? 1 : MoodModel.readValue("reminderDays", 7),
-                    hours: this.TESTING ?
-                        Helpers.range(0, 23, 1) :
-                        MoodModel.readValue("reminderHours", [10, 14, 18, 22]).sort(),
-                    settings: {
-                        hours: Helpers.range(0, 23, 1).map(function (item, index) {
-                            return {
-                                "value": item
-                            };
-                        })
-                    }
-                },
-            });
+                var past = moods.map(function (item, i) {
+                    return $.isNumeric(item) ? {
+                        "value": item,
+                        "editable": false,
+                        "day": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i]
+                    } : item;
+                });
+                console.log(past);
+                moodModel = new JSONModel({
+                    current: past[new Date().getDay()].value,
+                    past: past, //moods, //[-3, 2, 5, 0, 10, 1, -10]
+                    min: MoodModel.readValue("moodMin", -10),
+                    max: MoodModel.readValue("moodMax", 10),
+                    step: MoodModel.readValue("moodStep", 1),
+                    average: Formatter.average(past),
+                    median: Formatter.median(past),
+                    reminder: {
+                        days: MoodModel.readValue("reminderDays", 7),
+                        hours: MoodModel.readValue("reminderHours", [10, 14, 18, 22]).sort(),
+                        settings: {
+                            hours: Helpers.range(0, 23, 1).map(function (item, index) {
+                                return {
+                                    "value": item
+                                };
+                            })
+                        }
+                    },
+                });
+                Helpers.setupReminders(moodModel,
+                    "Remember to log your mood", "Mood Tracker");
+            }
             this.setModel(moodModel, "mood");
 
             //this.initializeSettingsData(function () {
@@ -141,10 +168,6 @@ sap.ui.define([
             //});
 
             document.addEventListener('pause', this.onWindowUnload.bind(this), false);
-            
-            Helpers.setupReminders(moodModel,
-                "Remember to log your mood", "Mood Tracker");
-
         },
         onWindowBeforeUnload: function () {
             //var oModel = this.getModel("i18n"),

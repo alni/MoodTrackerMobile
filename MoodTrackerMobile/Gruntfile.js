@@ -17,7 +17,65 @@ module.exports = function (grunt) {
                 port: 8080,
                 hostname: '*'
             },
-            src: {},
+            src: {
+                options: {
+                    port: 8080,
+                    base: '<%= dir.webapp %>',
+                    fileRemaps: {
+                        "messagebundle_nb.properties": {
+                            to: "messagebundle_no.properties",
+                            onlyWithinPath: "i18n"
+                        },
+                        "messagebundle_nb_NO.properties": {
+                            to: "messagebundle_no.properties",
+                            onlyWithinPath: "i18n"
+                        },
+                        "messagebundle_nn.properties": {
+                            to: "messagebundle_no.properties",
+                            onlyWithinPath: "resources"
+                        },
+                        "ACKNOWLEDGEMENTS.md": {
+                            to: "../ACKNOWLEDGEMENTS.md",
+                            excludedPath: "i18n"
+                        }
+                    },
+                    middleware: function (connect, options, middlewares) {
+                        middlewares.push(function (req, res, next) {
+                            var urlParts = req.url.split("/");
+                            var fileName = urlParts[urlParts.length - 1];
+                            var fileRemaps = options.fileRemaps;
+                            var remapFile = fileRemaps.hasOwnProperty(fileName)
+                                 ? fileRemaps[fileName] : null;
+                            if (remapFile) {
+                                // Redirect files from the "fileRemaps" option
+                                // to files with name from the "to" property.
+                                // But if the "onlyWitinPath" property is set,
+                                // only redirect files within that folder
+                                var onlyWithinPath = remapFile.onlyWithinPath;
+                                var excludedPath = remapFile.excludedPath;
+                                urlParts.pop(); // Remove last element (fileName)
+                                var path = options.base;
+                                path += urlParts.join("/");
+                                path += '/' + remapFile.to;
+                                if (excludedPath && urlParts.indexOf(excludedPath) > -1) {
+                                    return next();
+                                } else if (!onlyWithinPath || urlParts.indexOf(onlyWithinPath) > -1) {
+                                    try {
+                                        require('fs').createReadStream(path).pipe(res);
+                                    } catch (ex) {
+                                        return next();
+                                    }
+                                } else {
+                                    return next();
+                                }
+                            } else {
+                                return next();
+                            }
+                        });
+                        return middlewares;
+                    }
+                }
+            },
             dist: {}
         },
 
@@ -92,7 +150,8 @@ module.exports = function (grunt) {
                     cwd: '<%= dir.webapp %>',
                     src: [
                         '**',
-                        '!test/**'
+                        '!test/**',
+                        '!**/*.vsspell'
                     ],
                     dest: '<%= dir.dist %>'
                 }, {
@@ -139,6 +198,46 @@ module.exports = function (grunt) {
                         'marked/README.md',
                     ],
                     dest: '<%= dir.dist %>/resources/'
+                }, {
+                    cwd: '.',
+                    src: [
+                        'ACKNOWLEDGEMENTS.md'
+                    ],
+                    dest: '<%= dir.dist %>/'
+                }]
+            },
+            i18n: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= dir.dist %>',
+                    src: [
+                         '**/messagebundle_no.properties'
+                    ],
+                    rename: function (dest, src) {
+                        console.log(dest + src);
+                        // Create Norwegian Bookmal (nb) i18n files from
+                        // "messagebundle_no.properties" i18n files as
+                        // only regular Norwegian (no) is available
+                        return dest + src.replace('_no', '_nb');
+                    },
+                    dest: '<%= dir.dist %>/',
+                    filter: 'isFile'
+                }, {
+                    expand: true,
+                    cwd: '<%= dir.dist %>',
+                    src: [
+                         'resources/**/messagebundle_no.properties'
+                    ],
+                    rename: function (dest, src) {
+                        console.log(dest + src);
+                        // Create Norwegian Nynorsk (nb) i18n files from
+                        // "messagebundle_no.properties" i18n files in the 
+                        // "resources/" folder as only regular Norwegian (no) 
+                        // is available
+                        return dest + src.replace('_no', '_nn');
+                    },
+                    dest: '<%= dir.dist %>/',
+                    filter: 'isFile'
                 }]
             }
         },
