@@ -31,8 +31,9 @@
 sap.ui.define([
     "jquery.sap.global",
     "mood_tracker/controller/BaseController",
-    "mood_tracker/model/Mood"
-], function ($, BaseController, MoodModel) {
+    "mood_tracker/model/Mood",
+    "mood_tracker/util/Helpers"
+], function ($, BaseController, MoodModel, Helpers) {
     "use strict";
 
     var SettingsForm = BaseController.extend("mood_tracker.controller.detail.SettingsForm", {
@@ -78,6 +79,10 @@ sap.ui.define([
                 MoodModel.storeValue("reminderDays", oModel.getProperty("/reminder/days"));
                 MoodModel.storeValue("reminderHours", oModel.getProperty("/reminder/hours"));
             }
+
+            Helpers.setupReminders(oModel, 
+                this.getLocalizedText("notificationReminderBody"),
+                this.getLocalizedText("notificationReminderTitle"));
         },
 
         onNavBack: function () {

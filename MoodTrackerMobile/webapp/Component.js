@@ -37,6 +37,21 @@ sap.ui.define([
     "mood_tracker/util/Helpers"
 ], function ($, UIComponent, Device, JSONModel, MyRouter, Formatter, MoodModel, Helpers) {
     "use strict";
+
+    var weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        pastMoodsMap = function (item, i) {
+        return $.isNumeric(item) ? {
+            "value": item,
+            "editable": false,
+            "day": weekDays[i]
+        } : item;
+    };
+    var valueObjectMap = function (item, index) {
+        return {
+            "value": item
+        };
+    };
+
     /**
      * @class mood_tracker.Component
      */
@@ -103,37 +118,22 @@ sap.ui.define([
                     var oModel = oEvent.getSource(),
                         past = oModel.getProperty("/past"),
                         rsh = oModel.getProperty("/reminder/settings/hours");
-                    past = past.map(function (item, i) {
-                        return $.isNumeric(item) ? {
-                            "value": item,
-                            "editable": false,
-                            "day": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i]
-                        } : item;
-                    });
-                    rsh = rsh.map(function (item, index) {
-                        return {
-                            "value": item
-                        };
-                    });
+                    past = past.map(pastMoodsMap);
+                    rsh = rsh.map(valueObjectMap);
                     oModel.setProperty("/current", past[new Date().getDay()].value);
                     oModel.setProperty("/past", past);
                     oModel.setProperty("/reminder/settings/hours", rsh);
                     oModel.refresh(false);
                     Helpers.setupReminders(oModel,
-                        "Remember to log your mood", "Mood Tracker");
+                        this.formattedValue("notificationReminderBody"),
+                        this.formattedValue("notificationReminderTitle"));
                 }, this);
                 moodModel.loadData("model/sampleData.json");
             } else {
                 var moods = MoodModel.readValue("moods", [0, 0, 0, 0, 0, 0, 0]);
                 //[7, 8, 7, 7, 5, 6, 5]; 
 
-                var past = moods.map(function (item, i) {
-                    return $.isNumeric(item) ? {
-                        "value": item,
-                        "editable": false,
-                        "day": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i]
-                    } : item;
-                });
+                var past = moods.map(pastMoodsMap);
                 console.log(past);
                 moodModel = new JSONModel({
                     current: past[new Date().getDay()].value,
@@ -147,16 +147,13 @@ sap.ui.define([
                         days: MoodModel.readValue("reminderDays", 7),
                         hours: MoodModel.readValue("reminderHours", [10, 14, 18, 22]).sort(),
                         settings: {
-                            hours: Helpers.range(0, 23, 1).map(function (item, index) {
-                                return {
-                                    "value": item
-                                };
-                            })
+                            hours: Helpers.range(0, 23, 1).map(valueObjectMap)
                         }
                     },
                 });
                 Helpers.setupReminders(moodModel,
-                    "Remember to log your mood", "Mood Tracker");
+                    this.formattedValue("notificationReminderBody"),
+                    this.formattedValue("notificationReminderTitle"));
             }
             this.setModel(moodModel, "mood");
 
@@ -186,6 +183,10 @@ sap.ui.define([
                 MoodModel.storeValue("reminderDays", oModel.getProperty("/reminder/days"));
                 MoodModel.storeValue("reminderHours", oModel.getProperty("/reminder/hours"));
             }
+        },
+
+        formattedValue: function () {
+            Formatter.formattedValue.apply(this, arguments);
         }
     });
     return Component;

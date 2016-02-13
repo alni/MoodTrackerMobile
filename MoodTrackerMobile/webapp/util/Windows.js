@@ -218,6 +218,15 @@ sap.ui.define([
             updateTile(body, icon, title, returnTo, at);
         },
 
+        clearScheduledNotify : function() {
+            var notifier = notifications.ToastNotificationManager.createToastNotifier();
+            var scheduled = notifier.getScheduledToastNotifications();                    
+
+            $.each(scheduled, function(index, item) {
+                notifier.removeFromSchedule(item);
+            });
+        },
+
         updateTile: function (body, icon, title, returnTo) {
             updateTile(body, icon, title, returnTo);
         },

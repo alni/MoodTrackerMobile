@@ -170,6 +170,16 @@ sap.ui.define(["jquery.sap.global", "mood_tracker/util/Cordova", "mood_tracker/u
                 // Not supported on web
             }
         },
+
+        clearScheduledNotify : function() {
+            if (WindowsUtils.isWindowsApp()) {
+                WindowsUtils.clearScheduledNotify();
+            } else if (CordovaUtils.isCordovaApp()) {
+                CordovaUtils.clearScheduledNotify();
+            } else {
+                // Not supported on web
+            }
+        },
         hasScheduleNotifySupport : (function() {
             if (WindowsUtils.isWindowsApp() ||
                 CordovaUtils.isCordovaApp) {
@@ -211,14 +221,19 @@ sap.ui.define(["jquery.sap.global", "mood_tracker/util/Cordova", "mood_tracker/u
             var days = parseInt(oModel.getProperty("/reminder/days"), 10),
                 hours = oModel.getProperty("/reminder/hours").map(Number),
                 day = 0;
-            for (day = 0; day <= days; day++) {
-                $.each(hours, function (index, hour) {
-                    Helpers.setupReminder(hour, day, body, title);
-                    Helpers.setupReminder(hour, day, body, title);
-                    Helpers.setupReminder(hour, day, body, title);
-                    Helpers.setupReminder(hour, day, body, title);
-                });
+            if (Helpers.hasScheduleNotifySupport) {
+                // Only schedule reminders if scheduled notifications are 
+                // supported
 
+                Helpers.clearScheduledNotify(); // Clear existing notifications
+                for (day = 0; day <= days; day++) {
+                    $.each(hours, function (index, hour) {
+                        Helpers.setupReminder(hour, day, body, title);
+                        Helpers.setupReminder(hour, day, body, title);
+                        Helpers.setupReminder(hour, day, body, title);
+                        Helpers.setupReminder(hour, day, body, title);
+                    });
+                }
             }
         },
 

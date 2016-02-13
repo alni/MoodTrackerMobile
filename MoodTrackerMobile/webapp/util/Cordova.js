@@ -88,6 +88,11 @@ sap.ui.define([
         scheduleNotify: function (body, icon, title, returnTo, at) {
             showNotify(body, icon, title, returnTo, at);
         },
+        clearScheduledNotify: function () {
+            cordova.plugins.notification.local.cancelAll(function () {
+                // Notifications were cancelled
+            });
+        },
         enterFullScreen : function(bSwitchToFullScreen) {
             if (bSwitchToFullScreen) {
                 StatusBar.hide();
