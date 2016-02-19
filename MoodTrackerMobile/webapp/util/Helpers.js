@@ -229,9 +229,6 @@ sap.ui.define(["jquery.sap.global", "mood_tracker/util/Cordova", "mood_tracker/u
                 for (day = 0; day <= days; day++) {
                     $.each(hours, function (index, hour) {
                         Helpers.setupReminder(hour, day, body, title);
-                        Helpers.setupReminder(hour, day, body, title);
-                        Helpers.setupReminder(hour, day, body, title);
-                        Helpers.setupReminder(hour, day, body, title);
                     });
                 }
             }
