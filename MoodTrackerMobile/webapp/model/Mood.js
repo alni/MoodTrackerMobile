@@ -43,6 +43,20 @@ sap.ui.define([
     }
 
     MoodModel = {
+        storeModelData : function(oModel, alsoMoods) {
+            alsoMoods && MoodModel.storeValue("moods", oModel.getProperty("/past"));
+            MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
+            MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
+            MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
+
+            MoodModel.storeValue("reminderDays", oModel.getProperty("/reminder/days"));
+            MoodModel.storeValue("reminderHours", oModel.getProperty("/reminder/hours"));
+
+            MoodModel.storeValue("graphAverage", oModel.getProperty("/graph/average/enabled"));
+            MoodModel.storeValue("graphMedian", oModel.getProperty("/graph/median/enabled"));
+            MoodModel.storeValue("graphTrendLine", oModel.getProperty("/graph/trendLine/enabled"));
+            MoodModel.storeValue("graphAreas", oModel.getProperty("/graph/areas/enabled"));
+        },
         storeValue: function (key, value) {
             if (isWindowsApp && applicationData) {
                 var localSettings = applicationData.localSettings;

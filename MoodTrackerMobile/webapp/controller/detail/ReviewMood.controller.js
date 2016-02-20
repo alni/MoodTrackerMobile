@@ -199,7 +199,7 @@ sap.ui.define([
                             fontSize: this.options.tooltipFontSize,
                             caretHeight: this.options.tooltipCaretSize,
                             cornerRadius: this.options.tooltipCornerRadius,
-                            text: template(this.options.tooltipTemplate, Element),
+                            text: Chart.helpers.template(this.options.tooltipTemplate, Element),
                             chart: this.chart,
                             custom: this.options.customTooltips
                         }).draw();
@@ -212,7 +212,20 @@ sap.ui.define([
 
     var ReviewMood = BaseController.extend("mood_tracker.controller.detail.ReviewMood", {
         
-        oLineChart : null,
+        oLineChart: null,
+
+        oDataSetsIndex : {
+            areas: {
+                good: 0,
+                ok: 1,
+                bad: 2,
+                bad_min: 3
+            },
+            avg: 4,
+            med: 5,
+            moods: 6,
+            trendLine: 7
+        },
 
         onInit : function() {
             var oView = this.getView(),
@@ -276,14 +289,110 @@ sap.ui.define([
                 } finally {
                     if (ctx) {
                         this.oLineChart = this.createChart(data.past, ctx,
-                            data.min, data.max, data.average, data.median);
+                            data.min, data.max,
+                            data.graph.average.enabled ? data.average : false,
+                            data.graph.median.enabled ? data.median : false,
+                            data.graph.trendLine.enabled ? true : false,
+                            data.graph.areas.enabled ? true : false);
                         this.updateChart(data.past, this.oLineChart,
-                            data.min, data.max, data.average, data.median);
+                            data.min, data.max,
+                            data.graph.average.enabled ? data.average : false,
+                            data.graph.median.enabled ? data.median : false,
+                            data.graph.trendLine.enabled ? true : false,
+                            data.graph.areas.enabled ? true : false);
                         this.oLineChart.update();
                     }
                     window.oLineChart = this.oLineChart;
                 }
             }
+        },
+
+        /** 
+         * @url http://classroom.synonym.com/calculate-trendline-2709.html
+         * 
+         * Scientists often apply trendlines, or best fit lines, to their data
+         * after they graph it on an x, y plot. The idea of a trendline is to 
+         * reveal a linear relationship between two variables, x and y, in the 
+         * y = mx + b form. Deriving the line equation that links two variables
+         * allows scientists to extrapolate, or predict, how one variable will
+         * change given any change in the other. Most of the time you cannot
+         * simply draw a line through real life data because rarely will it fit
+         * neatly. A statistical tool called regression analysis is required to
+         * calculate the best fit line accurately. Regression analysis of a large
+         * data set will easily fill both sides of a paper with numbers, so if
+         * you can find a program to do it for you, you'll save lots of time.
+         */
+        calculateTrendLine: function (inputData) {
+            // ## Calculating the Slope (m) of the Trendline ##
+            var outputData = [].concat(inputData);
+            // Step 1: Let n = the number of data points
+            var n = inputData.length;
+
+            // Step 2: Let a equal n times the summation of all x-values 
+            // multiplied by their corresponding y-values
+            var a = 0;
+            $.each(inputData, function (index, item) {
+                a += (index + 1) * item;
+            });
+
+            // Step 3: Let b equal the sum of all x-values times the sum of all 
+            // y - values
+            var b_x = 0;
+            $.each(inputData, function (index, item) {
+                b_x += item;
+            });
+            var b_y = 0;
+            $.each(inputData, function (index, item) {
+                b_y += (index + 1);
+            });
+            var b = b_x * b_y;
+
+            // Step 4: Let c equal n times the sum of all squared x-values
+            var c_x = 0;
+            $.each(inputData, function (index, item) {
+                c_x += item * item;
+            });
+            var c = n * c_x;
+
+            // Step 5: Let d equal the squared sum of all x-values
+            var d_x = 0;
+            $.each(inputData, function (index, item) {
+                d_x += item;
+            });
+            var d = d_x * d_x;
+
+            // Step 6: Plug the values that you calculated for a, b, c, and d 
+            // into the following equation to calculate the slope, m, of the 
+            // regression line: slope = m = (a - b) / (c - d)
+            var m = (a - b) / (c - d);
+
+
+            // ## Calculating the y-intercept (b) of the Trendline ##
+
+            // Step 1: Let e equal the sum of all y-values
+            var e = 0;
+            $.each(inputData, function (index, item) {
+                e += item;
+            });
+
+            // Step 2: Let f equal the slope times the sum of all x-values
+            var f_x = 0;
+            $.each(inputData, function (index, item) {
+                f_x += (index + 1);
+            });
+            var f = m * f_x;
+
+            // Step 3: Plug the values you have calculated for e and f into the
+            // following equation for the y-intercept, b, of the trendline: 
+            // y-intercept = b = (e - f) / n
+            var b = (e - f) / n;
+
+            // Step 4: Plug your values for m and b into a linear equation to
+            // reveal the final trendline equation. y = mx + b
+            $.each(outputData, function (x) {
+                outputData[x] = (m * (x + 1)) + b;
+            });
+            return outputData;
         },
 
         createDataSet : function(inputData, dayShift) {
@@ -328,17 +437,19 @@ sap.ui.define([
             return localeData.getDays("abbreviated");
         },
 
-        createChart: function (inputData, ctx, min, max, avg, med) {
+        createChart: function (inputData, ctx, min, max, avg, med, trendLine, areas) {
             var sFillColor = this.getThemingParameter("sapUiMediumBG"),
                 sStrokeColor = this.getThemingParameter("sapUiChart4"),
                 sGoodColor = this.getThemingParameter("sapUiChartGood"),
                 sOKColor = this.getThemingParameter("sapUiChartNeutral"),
                 sBadColor = this.getThemingParameter("sapUiChartBad"),
                 currentDay = new Date().getDay() + 1,
-                dayShift, outputData,
-                average = $.isNumeric(avg) ? avg : Formatter.average(inputData),
-                median = $.isNumeric(med) ? med : Formatter.median(inputData),
-                moodAreasData = this.createMoodAreaDatasets(min, max),
+                dayShift, outputData, trendLineData,
+                average = avg !== false 
+                    && ($.isNumeric(avg) ? avg : Formatter.average(inputData)),
+                median = med !== false 
+                    && ($.isNumeric(med) ? med : Formatter.median(inputData)),
+                moodAreasData = areas !== false && this.createMoodAreaDatasets(min, max),
                 tooltipLabels = Formatter.makeStringsSameLength(
                     this.getLocalizedText("reviewMoodChartLabelAverage"),
                     this.getLocalizedText("reviewMoodChartLabelMedian"),
@@ -346,8 +457,9 @@ sap.ui.define([
                 sReviewMoodChartLabelAverage = tooltipLabels[0],
                 sReviewMoodChartLabelMedian = tooltipLabels[1],
                 sReviewMoodChartLabelMood = tooltipLabels[2].trim(),
+                sReviewMoodChartLabelMoodTrend = this.getLocalizedText("reviewMoodChartLabelMoodTrend"),
                 labels = this.createDayLabels(),
-                data;
+                data, datasets = [];
 
             if (currentDay > 6) {
                 currentDay = 0;
@@ -360,13 +472,114 @@ sap.ui.define([
             }), dayShift);
             console.log(outputData);
             var realMax = Math.max.apply(null, outputData);
-            if (realMax < moodAreasData.good[0]) {
+            //if (realMax < moodAreasData.good[0]) {
                 //moodAreasData.good = this.createFlatDataSet(realMax);
-            }
+            //}
             console.log(moodAreasData);
+
+            trendLineData = this.calculateTrendLine(outputData);
+
+            if (areas !== false) {
+                datasets.push({
+                    fillColor: sGoodColor, //"rgba(220,220,220,0.2)",
+                    strokeColor: sGoodColor, //"rgba(220,220,220,1)",
+                    pointColor: "transparent",
+                    pointStrokeColor: "transparent",
+                    pointHighlightFill: "transparent",
+                    pointHighlightStroke: "transparent",
+                    data: moodAreasData.good
+                }, {
+                    fillColor: sOKColor, //"rgba(220,220,220,0.2)",
+                    strokeColor: sOKColor, //"rgba(220,220,220,1)",
+                    pointColor: "transparent",
+                    pointStrokeColor: "transparent",
+                    pointHighlightFill: "transparent",
+                    pointHighlightStroke: "transparent",
+                    data: moodAreasData.ok
+                }, {
+                    fillColor: sBadColor, //"rgba(220,220,220,0.2)",
+                    strokeColor: sBadColor, //"rgba(220,220,220,1)",
+                    pointColor: "transparent",
+                    pointStrokeColor: "transparent",
+                    pointHighlightFill: "transparent",
+                    pointHighlightStroke: "transparent",
+                    data: moodAreasData.bad
+                }, {
+                    fillColor: sBadColor, //"rgba(220,220,220,0.2)",
+                    strokeColor: sBadColor, //"rgba(220,220,220,1)",
+                    pointColor: "transparent",
+                    pointStrokeColor: "transparent",
+                    pointHighlightFill: "transparent",
+                    pointHighlightStroke: "transparent",
+                    data: this.createFlatDataSet(null).concat([0])
+                });
+            } else {
+                this.oDataSetsIndex.avg -= 4;
+                this.oDataSetsIndex.med -= 4;
+                this.oDataSetsIndex.moods -= 4;
+                this.oDataSetsIndex.trendLine -= 4;
+            }
+
+            if (avg !== false) {
+                datasets.push({
+                    label: sReviewMoodChartLabelAverage, //"Average",
+                    fillColor: "transparent", //"rgba(220,220,220,0.2)",
+                    strokeColor: this.getThemingParameter("sapUiChart5"), //"rgba(220,220,220,1)",
+                    pointColor: this.getThemingParameter("sapUiChart5"),
+                    pointStrokeColor: "transparent",
+                    pointHighlightFill: "transparent",
+                    pointHighlightStroke: "transparent",
+                    data: this.createFlatDataSet(average).concat(average)
+                });
+            } else {
+                this.oDataSetsIndex.med -= 1;
+                this.oDataSetsIndex.moods -= 1;
+                this.oDataSetsIndex.trendLine -= 1;
+            }
+
+            if (med !== false) {
+                datasets.push({
+                    label: sReviewMoodChartLabelMedian, //"Median",
+                    fillColor: "transparent", //"rgba(220,220,220,0.2)",
+                    strokeColor: this.getThemingParameter("sapUiChart3"), //"rgba(220,220,220,1)",
+                    pointColor: this.getThemingParameter("sapUiChart3"),
+                    pointStrokeColor: "transparent",
+                    pointHighlightFill: "transparent",
+                    pointHighlightStroke: "transparent",
+                    data: this.createFlatDataSet(median).concat(median)
+                });
+            } else {
+                this.oDataSetsIndex.moods -= 1;
+                this.oDataSetsIndex.trendLine -= 1;
+            }
+
+            datasets.push({
+                label: sReviewMoodChartLabelMood, //"Mood",
+                fillColor: "transparent", //"rgba(220,220,220,0.2)",
+                strokeColor: sStrokeColor, //"rgba(220,220,220,1)",
+                pointColor: sStrokeColor,
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: outputData
+            });
+
+            if (trendLine !== false) {
+                datasets.push({
+                    label: sReviewMoodChartLabelMoodTrend, //"Mood",
+                    fillColor: "transparent", //"rgba(220,220,220,0.2)",
+                    strokeColor: sStrokeColor, //"rgba(220,220,220,1)",
+                    pointColor: sStrokeColor,
+                    pointStrokeColor: "#fff",
+                    pointHighlightFill: "#fff",
+                    pointHighlightStroke: "rgba(220,220,220,1)",
+                    data: trendLineData
+                });
+            }
+
             data = {
                 labels: this.createDataSet(labels, dayShift),
-                datasets: [
+                datasets: datasets || [
                     {
                         fillColor: sGoodColor, //"rgba(220,220,220,0.2)",
                         strokeColor: sGoodColor, //"rgba(220,220,220,1)",
@@ -429,6 +642,16 @@ sap.ui.define([
                         pointHighlightFill: "#fff",
                         pointHighlightStroke: "rgba(220,220,220,1)",
                         data: outputData
+                    },
+                    {
+                        label: sReviewMoodChartLabelMoodTrend, //"Mood",
+                        fillColor: "transparent", //"rgba(220,220,220,0.2)",
+                        strokeColor: sStrokeColor, //"rgba(220,220,220,1)",
+                        pointColor: sStrokeColor,
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(220,220,220,1)",
+                        data: trendLineData
                     }
                 ]
             };
@@ -473,7 +696,7 @@ sap.ui.define([
                     "<%if (datasetLabel) { %>",
                         "<%= datasetLabel %>: ",
                     "<% } %>",
-                    "<%= value %>", " ",
+                    "<%= value.toFixed(0) %>", " ",
                     "<%if (averageCompare) { %>",
                         "(<%= averageCompare %>%)",
                     "<% } %>",
@@ -484,17 +707,22 @@ sap.ui.define([
             });
         },
 
-        updateChart: function (inputData, oLineChart, min, max, avg, med) {
+        updateChart: function (inputData, oLineChart, min, max, avg, med, trendLine, areas) {
+            console.error(med);
             console.log(oLineChart.datasets);
-            var lastDataset = oLineChart.datasets.length - 1,
+            var controller = this,
+                lastDataset = oLineChart.datasets.length - 1,
+                moodDataSet = trendLine !== false ? lastDataset - 1 : lastDataset,
                 currentDay = new Date().getDay() + 1,
                 dayShift,
-                moodAreasData = this.createMoodAreaDatasets(min, max),
-                outputData,
-                average = $.isNumeric(avg) ? avg : Formatter.average(inputData),
-                median = $.isNumeric(med) ? med : Formatter.median(inputData),
-                averageDataSet = this.createFlatDataSet(average).concat(average),
-                medianDataSet = this.createFlatDataSet(median).concat(median);
+                moodAreasData = areas !== false && this.createMoodAreaDatasets(min, max),
+                outputData, trendLineData,
+                average = avg !== false 
+                    && ($.isNumeric(avg) ? avg : Formatter.average(inputData)),
+                median = med !== false 
+                    && ($.isNumeric(med) ? med : Formatter.median(inputData)),
+                averageDataSet = $.isNumeric(average) && this.createFlatDataSet(average).concat(average),
+                medianDataSet = $.isNumeric(median) && this.createFlatDataSet(median).concat(median);
 
             if (currentDay > 6) {
                 currentDay = 0;
@@ -502,43 +730,80 @@ sap.ui.define([
             dayShift = -currentDay;
 
             var realMax = Math.max.apply(null, inputData);
-            if (realMax < moodAreasData.good[0]) {
+            //if (realMax < moodAreasData.good[0]) {
                 //moodAreasData.good = this.createFlatDataSet(realMax);
+            //}
+            if (areas !== false) {
+                console.log(moodAreasData.good);
+                $.each(moodAreasData.good, function (index, item) {
+                    oLineChart.datasets[0].points[index].value = item;
+                });
+                $.each(moodAreasData.ok, function (index, item) {
+                    oLineChart.datasets[1].points[index].value = item;
+                });
+                $.each(moodAreasData.bad, function (index, item) {
+                    oLineChart.datasets[2].points[index].value = item;
+                });
             }
-            console.log(moodAreasData.good);
-            $.each(moodAreasData.good, function (index, item) {
-                oLineChart.datasets[0].points[index].value = item;
-            });
-            $.each(moodAreasData.ok, function (index, item) {
-                oLineChart.datasets[1].points[index].value = item;
-            });
-            $.each(moodAreasData.bad, function (index, item) {
-                oLineChart.datasets[2].points[index].value = item;
-            });
 
             outputData = this.createDataSet(inputData.map(function(item, index) {
                 return item.value;   
             }), dayShift);
 
-            $.each(averageDataSet, function (index, item) {
-                oLineChart.datasets[lastDataset - 2].points[index].value = item;
-                oLineChart.datasets[lastDataset - 2].points[index].averageCompare = null;
-                //oLineChart.datasets[lastDataset - 2].points[index].average = null;
-                //oLineChart.datasets[lastDataset - 2].points[index].median = null;
-            });
-            $.each(medianDataSet, function (index, item) {
-                oLineChart.datasets[lastDataset - 1].points[index].value = item;
-                oLineChart.datasets[lastDataset - 1].points[index].averageCompare = null;
-                //oLineChart.datasets[lastDataset - 1].points[index].average = null;
-                //oLineChart.datasets[lastDataset - 1].points[index].median = null;
-            });
+            if (avg !== false) {
+                $.each(averageDataSet, function (index, item) {
+                    oLineChart.datasets[controller.oDataSetsIndex.avg].points[index].value = item;
+                    oLineChart.datasets[controller.oDataSetsIndex.avg].points[index].averageCompare = null;
+                    //oLineChart.datasets[moodDataSet - 2].points[index].value = item;
+                    //oLineChart.datasets[moodDataSet - 2].points[index].averageCompare = null;
+
+                    //oLineChart.datasets[lastDataset - 2].points[index].average = null;
+                    //oLineChart.datasets[lastDataset - 2].points[index].median = null;
+                });
+            }
+            if (med !== false) {
+                $.each(medianDataSet, function (index, item) {
+                    oLineChart.datasets[controller.oDataSetsIndex.med].points[index].value = item;
+                    oLineChart.datasets[controller.oDataSetsIndex.med].points[index].averageCompare = null;
+
+                    //oLineChart.datasets[moodDataSet - 1].points[index].value = item;
+                    //oLineChart.datasets[moodDataSet - 1].points[index].averageCompare = null;
+
+                    //oLineChart.datasets[lastDataset - 1].points[index].average = null;
+                    //oLineChart.datasets[lastDataset - 1].points[index].median = null;
+                });
+            }
             $.each(outputData, function (index, item) {
-                oLineChart.datasets[lastDataset].points[index].value = item;
-                oLineChart.datasets[lastDataset].points[index].averageCompare =
-                    Math.round((item / average) * 100);
+                oLineChart.datasets[controller.oDataSetsIndex.moods].points[index].value = item;
+                oLineChart.datasets[controller.oDataSetsIndex.moods].points[index].averageCompare =
+                    $.isNumeric(average) ?
+                        Math.round((item / average) * 100) : null;
+
+                //oLineChart.datasets[moodDataSet].points[index].value = item;
+                //oLineChart.datasets[moodDataSet].points[index].averageCompare =
+                //    $.isNumeric(average) ? 
+                //        Math.round((item / average) * 100) : null;
+
                 //oLineChart.datasets[lastDataset].points[index].average = average;
                 //oLineChart.datasets[lastDataset].points[index].median = median;
             });
+            if (trendLine !== false) {
+                trendLineData = this.calculateTrendLine(outputData);
+                $.each(trendLineData, function (index, item) {
+                    oLineChart.datasets[controller.oDataSetsIndex.trendLine].points[index].value = item;
+                    oLineChart.datasets[controller.oDataSetsIndex.trendLine].points[index].averageCompare =
+                        $.isNumeric(average) ?
+                            Math.round((item / average) * 100) : null;
+
+                    //oLineChart.datasets[lastDataset].points[index].value = item;
+                    //oLineChart.datasets[lastDataset].points[index].averageCompare =
+                    //    $.isNumeric(average) ?
+                    //        Math.round((item / average) * 100) : null;
+
+                    //oLineChart.datasets[lastDataset].points[index].average = average;
+                    //oLineChart.datasets[lastDataset].points[index].median = median;
+                });
+            }
             oLineChart.update();
             console.log(oLineChart.datasets);
 

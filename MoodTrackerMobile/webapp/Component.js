@@ -150,6 +150,20 @@ sap.ui.define([
                             hours: Helpers.range(0, 23, 1).map(valueObjectMap)
                         }
                     },
+                    graph: {
+                        average: {
+                            enabled: MoodModel.readValue("graphAverage", true)
+                        },
+                        median: {
+                            enabled: MoodModel.readValue("graphMedian", true)
+                        },
+                        trendLine: {
+                            enabled: MoodModel.readValue("graphTrendLine", false)
+                        },
+                        areas: {
+                            enabled: MoodModel.readValue("graphAreas", true)
+                        }
+                    },
                 });
                 Helpers.setupReminders(moodModel,
                     this.formattedValue("notificationReminderBody"),
@@ -175,13 +189,8 @@ sap.ui.define([
         onWindowUnload: function () {
             var oModel = this.getModel("mood");
             if (!this.TESTING) {
-                MoodModel.storeValue("moods", oModel.getProperty("/past"));
-                MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
-                MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
-                MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
-
-                MoodModel.storeValue("reminderDays", oModel.getProperty("/reminder/days"));
-                MoodModel.storeValue("reminderHours", oModel.getProperty("/reminder/hours"));
+                // Store current data from the mood Model (including moods)
+                MoodModel.storeModelData(oModel, true);
             }
         },
 

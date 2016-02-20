@@ -169,6 +169,43 @@
                             formatter: 'mood_tracker.model.Formatter.localizedValue'
                           }" />
             </MultiComboBox>
+            <!-- /Reminder Setup -->
+
+            <!-- Graph Setup -->
+            <core:Title text="{i18n>settingsFormTitleGraphSetup}" />
+            <!-- Enable Graph Parts -->
+            <Label text="{i18n>settingsFormLabelGraphEnableParts}" />
+            <!-- Average -->
+            <CheckBox selected="{mood>/graph/average/enabled}" 
+                      text="{i18n>settingsFormLabelGraphAverage}" />
+            <!-- Median -->
+            <CheckBox selected="{mood>/graph/median/enabled}"
+                     text="{i18n>settingsFormLabelGraphMedian}">
+              <layoutData>
+                <l:GridData linebreak="true"
+                            indentL="3"
+                            indentM="3" />
+              </layoutData>
+            </CheckBox>
+            <!-- Trendline -->
+            <CheckBox selected="{mood>/graph/trendLine/enabled}"
+                     text="{i18n>settingsFormLabelGraphTrendLine}">
+              <layoutData>
+                <l:GridData linebreak="true"
+                            indentL="3"
+                            indentM="3" />
+              </layoutData>
+            </CheckBox>
+            <!-- Areas -->
+            <CheckBox selected="{mood>/graph/areas/enabled}"
+                     text="{i18n>settingsFormLabelGraphAreas}">
+              <layoutData>
+                <l:GridData linebreak="true"
+                            indentL="3"
+                            indentM="3" />
+              </layoutData>
+            </CheckBox>
+            <!-- /Graph Setup -->
           </f:content>
         </f:SimpleForm>
       </content>

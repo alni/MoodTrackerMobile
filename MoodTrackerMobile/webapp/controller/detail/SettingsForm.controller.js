@@ -72,12 +72,9 @@ sap.ui.define([
             var oView = this.getView(),
                 oModel = oView.getModel("mood");
             if (!this.isTESTING()) {
-                MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
-                MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
-                MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
-
-                MoodModel.storeValue("reminderDays", oModel.getProperty("/reminder/days"));
-                MoodModel.storeValue("reminderHours", oModel.getProperty("/reminder/hours"));
+                // Store current data from the mood Model (but do not include 
+                // the current moods - only settings)
+                MoodModel.storeModelData(oModel, false);
             }
 
             Helpers.setupReminders(oModel, 
