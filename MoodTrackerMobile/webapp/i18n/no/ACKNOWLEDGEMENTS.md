@@ -34,6 +34,13 @@ Brukt med å lage formatert innhold fra spesiell `Markdown` tekst.
 * `Lisens` - the [MIT license][marked-license]
 * `Forfatter` - [Christopher Jeffrey][marked-author]
 
+### [Cordova Local-Notification Plugin][cordova-plugin-local-notifications] ###
+
+Brukt med å lage påminnelse-varsler.
+
+* `Lisens` - the [Apache 2.0 License][cordova-plugin-local-notifications-license]
+* `Forfatter` - [appPlant UG, Inc][cordova-plugin-local-notifications-author]
+
 
 [cordova]: https://cordova.apache.org/ "Apache Cordova"
 [cordova-license]: http://www.apache.org/licenses/LICENSE-2.0 "Apache License 2.0"
@@ -49,6 +56,12 @@ Brukt med å lage formatert innhold fra spesiell `Markdown` tekst.
 [marked]: https://github.com/chjj/marked "marked"
 [marked-license]: https://github.com/chjj/marked/blob/master/LICENSE "MIT license"
 [marked-author]: https://github.com/chjj/ "Christopher Jeffrey"
+
+[cordova-plugin-local-notifications]: https://github.com/katzer/cordova-plugin-local-notifications "Cordova Local-Notification Plugin"
+
+[cordova-plugin-local-notifications-license]: http://opensource.org/licenses/Apache-2.0 "Apache 2.0 License"
+
+[cordova-plugin-local-notifications-author]: http://www.appplant.de/ "appPlant UG, Inc"
 
 ## Andre ressurser ##
 
