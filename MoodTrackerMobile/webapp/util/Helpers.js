@@ -298,6 +298,12 @@ sap.ui.define(["jquery.sap.global", "mood_tracker/util/Cordova", "mood_tracker/u
 
             return range;
 
+        },
+
+        flatRange: function (val, length) {
+            return Helpers.range(1, length).map(function () {
+                return val;
+            });
         }
     };
 

@@ -140,6 +140,20 @@
                           }" />
             <Slider id="moodStep" value="{mood>/step}" min="1" max="10" step="1" />
             <!-- /Mood Step -->
+            <!-- Mood Mode -->
+            <Label text="{i18n>settingsFormLabelMoodMode}" />
+            <Select id="moodMode"
+                           selectedKey="{mood>/mode}"
+                           items="{mood>/settings/mode}">
+              <core:Item key="{mood>value}" text="{
+                            parts: [{
+                              path: 'mood>value'
+                            }, {
+                              path: 'i18n>settingsFormItemMoodModeKey'
+                            }],
+                            formatter: 'mood_tracker.model.Formatter.localizedValue'
+                          }" />
+            </Select>
             <!-- /Mood Setup -->
             <!-- Reminder Setup -->
             <core:Title text="{i18n>settingsFormTitleReminderSetup}" />

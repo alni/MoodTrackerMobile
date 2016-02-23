@@ -43,11 +43,25 @@ sap.ui.define([
     }
 
     MoodModel = {
-        storeModelData : function(oModel, alsoMoods) {
-            alsoMoods && MoodModel.storeValue("moods", oModel.getProperty("/past"));
+        getMonthlyMoods : function(dToday, aWeeklyMoods) {
+            var todayDayOfMonth = dToday.getDate();
+            var todayDayOfWeek = dToday.getDay();
+        },
+        storeModelData: function (oModel, alsoMoods) {
+            var mode = oModel.getProperty("/mode");
+            if (alsoMoods) {
+                if (mode == "weekly") {
+                    MoodModel.storeValue("moods", oModel.getProperty("/past"));
+                } else if (mode == "monthly") {
+                    MoodModel.storeValue("moodsMonthly", oModel.getProperty("/past"));
+                }
+            }
+            //alsoMoods && MoodModel.storeValue("moods", oModel.getProperty("/past"));
             MoodModel.storeValue("moodMin", oModel.getProperty("/min"));
             MoodModel.storeValue("moodMax", oModel.getProperty("/max"));
             MoodModel.storeValue("moodStep", oModel.getProperty("/step"));
+
+            MoodModel.storeValue("moodMode", mode);
 
             MoodModel.storeValue("reminderDays", oModel.getProperty("/reminder/days"));
             MoodModel.storeValue("reminderHours", oModel.getProperty("/reminder/hours"));

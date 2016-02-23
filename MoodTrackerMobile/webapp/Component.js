@@ -40,12 +40,29 @@ sap.ui.define([
 
     var weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         pastMoodsMap = function (item, i) {
-        return $.isNumeric(item) ? {
-            "value": item,
-            "editable": false,
-            "day": weekDays[i]
-        } : item;
-    };
+            return $.isNumeric(item) ? {
+                "value": item,
+                "editable": false,
+                "day": weekDays[i]
+            } : item;
+        }, pastMoodsMapMonthly = function (item, i) {
+            var date = new Date();
+            if (date.getDate() < i + 1) {
+                date.setMonth(date.getMonth() - 1);
+            }
+            date.setDate(i + 1);
+            var value = $.isNumeric(item) ? item : item.value;
+            value = $.isNumeric(value) ? value : value.value;
+            //return $.isNumeric(item) ? {
+            return {
+                "value": value,
+                "editable": false,
+                "day": Formatter.dateValue(date),
+                "date": i + 1
+            }; // : item;
+        };
+
+
     var valueObjectMap = function (item, index) {
         return {
             "value": item
@@ -130,19 +147,45 @@ sap.ui.define([
                 }, this);
                 moodModel.loadData("model/sampleData.json");
             } else {
-                var moods = MoodModel.readValue("moods", [0, 0, 0, 0, 0, 0, 0]);
-                //[7, 8, 7, 7, 5, 6, 5]; 
+                var mode = MoodModel.readValue("moodMode", "weekly");
+                var today = new Date();
+                var moods, day, past;
+                if (mode == "weekly") {
+                    day = today.getDay();
+                    moods = MoodModel.readValue("moods", Helpers.flatRange(0, 7));
+                    if (moods.length != 7) {
+                        moods = Helpers.flatRange(0, 7);
+                    }
+                    past = moods.map(pastMoodsMap);
+                } else if (mode == "monthly") {
+                    day = today.getDate();
+                    moods = MoodModel.readValue("moodsMonthly",
+                        Helpers.flatRange(0, 31));
+                    if (moods.length != 31) {
+                        moods = Helpers.flatRange(0, 31);
+                    }
+                    past = moods.map(pastMoodsMapMonthly);
+                }
+                
 
-                var past = moods.map(pastMoodsMap);
+                //[7, 8, 7, 7, 5, 6, 5]; 
                 console.log(past);
                 moodModel = new JSONModel({
-                    current: past[new Date().getDay()].value,
+                    current: past[day].value, //past[new Date().getDay()].value,
                     past: past, //moods, //[-3, 2, 5, 0, 10, 1, -10]
                     min: MoodModel.readValue("moodMin", -10),
                     max: MoodModel.readValue("moodMax", 10),
                     step: MoodModel.readValue("moodStep", 1),
+                    mode: mode,
                     average: Formatter.average(past),
                     median: Formatter.median(past),
+                    settings: {
+                        mode: [{
+                            value: "weekly"
+                        }, {
+                            value: "monthly"
+                        }]
+                    },
                     reminder: {
                         days: MoodModel.readValue("reminderDays", 7),
                         hours: MoodModel.readValue("reminderHours", [10, 14, 18, 22]).sort(),

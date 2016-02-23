@@ -32,7 +32,8 @@ sap.ui.define([
     "jquery.sap.global",
     "mood_tracker/controller/BaseController",
     "mood_tracker/model/Formatter",
-], function ($, BaseController, Formatter) {
+    "mood_tracker/util/Helpers"
+], function ($, BaseController, Formatter, Helpers) {
     "use strict";
 
     Chart.types.Line.extend({
@@ -227,6 +228,21 @@ sap.ui.define([
             trendLine: 7
         },
 
+        resetDataSetsIndex: function() {
+            this.oDataSetsIndex = {
+                areas: {
+                    good: 0,
+                    ok: 1,
+                    bad: 2,
+                    bad_min: 3
+                },
+                avg: 4,
+                med: 5,
+                moods: 6,
+                trendLine: 7
+            };
+        },
+
         onInit : function() {
             var oView = this.getView(),
                 controller = this;
@@ -236,7 +252,7 @@ sap.ui.define([
 
             oView.addEventDelegate({
                 onAfterShow : function(oEvent) {
-                    controller.updateReviewMood(!!controller.oLineChart);
+                    controller.updateReviewMood(); //!!controller.oLineChart);
                 }
             });
 
@@ -264,7 +280,12 @@ sap.ui.define([
             if (updateOnly) {
                 if (this.oLineChart) {
                     this.updateChart(data.past, this.oLineChart,
-                        data.min, data.max, data.average, data.median);
+                        data.min, data.max, 
+                        data.graph.average.enabled ? data.average : false,
+                        data.graph.median.enabled ? data.median : false,
+                        data.graph.trendLine.enabled ? true : false,
+                        data.graph.areas.enabled ? true : false,
+                        data.mode);
                 }
             } else {
                 lineChartHtml = oView.byId("lineChartHtml");
@@ -288,18 +309,21 @@ sap.ui.define([
                     $.sap.log.error(ex);
                 } finally {
                     if (ctx) {
+                        this.resetDataSetsIndex();
                         this.oLineChart = this.createChart(data.past, ctx,
                             data.min, data.max,
                             data.graph.average.enabled ? data.average : false,
                             data.graph.median.enabled ? data.median : false,
                             data.graph.trendLine.enabled ? true : false,
-                            data.graph.areas.enabled ? true : false);
+                            data.graph.areas.enabled ? true : false,
+                            data.mode);
                         this.updateChart(data.past, this.oLineChart,
                             data.min, data.max,
                             data.graph.average.enabled ? data.average : false,
                             data.graph.median.enabled ? data.median : false,
                             data.graph.trendLine.enabled ? true : false,
-                            data.graph.areas.enabled ? true : false);
+                            data.graph.areas.enabled ? true : false,
+                            data.mode);
                         this.oLineChart.update();
                     }
                     window.oLineChart = this.oLineChart;
@@ -395,27 +419,35 @@ sap.ui.define([
             return outputData;
         },
 
-        createDataSet : function(inputData, dayShift) {
-            var outputData = [0, 0, 0, 0, 0, 0, 0];
+        createDataSet : function(inputData, dayShift, mode) {
+            var outputData = this.createFlatDataSet(0, mode); //[0, 0, 0, 0, 0, 0, 0];
             $.each(inputData, function (index, item) {
                 console.log(item);
                 var day = index + dayShift;
                 if (day < 0) {
-                    day += 7;
-                } else if (day > 6) {
-                    day -= 7;
+                    day += inputData.length; //7;
+                } else if (day > inputData.length - 1) { //6) {
+                    day -= inputData.length; //7;
                 }
                 outputData[day] = item;
             });
-            console.log(outputData);
+            console.error(outputData);
             return outputData;
         },
 
-        createFlatDataSet : function(value) {
-            return [value, value, value, value, value, value, value];
+        createFlatDataSet: function (value, mode) {
+            if (mode == "weekly") {
+                return [value, value, value, value, value, value, value];
+            } else if (mode == "monthly") {
+                var values = [];
+                for (var i = 0; i < 31; i++) {
+                    values.push(value);
+                }
+                return values;
+            }
         },
 
-        createMoodAreaDatasets: function (min, max) {
+        createMoodAreaDatasets: function (min, max, mode) {
             var ok_r = 0.65,
                 bad_r = 0.35,
                 goodMax, okMax, badMax;
@@ -425,31 +457,46 @@ sap.ui.define([
             badMax = bad_r * max + (1 - bad_r) * min;
 
             return {
-                good: [goodMax].concat(this.createFlatDataSet(null)).concat([goodMax]),
-                ok: [okMax].concat(this.createFlatDataSet(null)).concat([okMax]),
-                bad: [badMax].concat(this.createFlatDataSet(null)).concat([badMax]),
+                good: [goodMax].concat(this.createFlatDataSet(null, mode)).concat([goodMax]),
+                ok: [okMax].concat(this.createFlatDataSet(null, mode)).concat([okMax]),
+                bad: [badMax].concat(this.createFlatDataSet(null, mode)).concat([badMax]),
             };
         },
 
-        createDayLabels: function () {
-            var locale = sap.ui.getCore().getConfiguration().getLocale(),
-                localeData = new sap.ui.core.LocaleData(locale);
-            return localeData.getDays("abbreviated");
+        createDayLabels: function (mode) {
+            if (mode == "weekly") {
+                var locale = sap.ui.getCore().getConfiguration().getLocale(),
+                    localeData = new sap.ui.core.LocaleData(locale);
+                return localeData.getDays("abbreviated");
+            } else if (mode == "monthly") {
+                var values = [];
+                var today = new Date();
+                for (var i = 0; i < 31; i++) {
+                    var date = new Date();
+                    date.setDate(i + 1);
+                    if (today.getDate() < i + 1) {
+                        date.setMonth(date.getMonth() - 1);
+                    }
+                    values.push(Formatter.dateValue(date));
+                }
+                console.error(values);
+                return values;
+            }
         },
 
-        createChart: function (inputData, ctx, min, max, avg, med, trendLine, areas) {
+        createChart: function (inputData, ctx, min, max, avg, med, trendLine, areas, mode) {
             var sFillColor = this.getThemingParameter("sapUiMediumBG"),
                 sStrokeColor = this.getThemingParameter("sapUiChart4"),
                 sGoodColor = this.getThemingParameter("sapUiChartGood"),
                 sOKColor = this.getThemingParameter("sapUiChartNeutral"),
                 sBadColor = this.getThemingParameter("sapUiChartBad"),
                 currentDay = new Date().getDay() + 1,
-                dayShift, outputData, trendLineData,
+                dayShift, maxDay, outputData, trendLineData,
                 average = avg !== false 
                     && ($.isNumeric(avg) ? avg : Formatter.average(inputData)),
                 median = med !== false 
                     && ($.isNumeric(med) ? med : Formatter.median(inputData)),
-                moodAreasData = areas !== false && this.createMoodAreaDatasets(min, max),
+                moodAreasData = areas !== false && this.createMoodAreaDatasets(min, max, mode),
                 tooltipLabels = Formatter.makeStringsSameLength(
                     this.getLocalizedText("reviewMoodChartLabelAverage"),
                     this.getLocalizedText("reviewMoodChartLabelMedian"),
@@ -458,18 +505,29 @@ sap.ui.define([
                 sReviewMoodChartLabelMedian = tooltipLabels[1],
                 sReviewMoodChartLabelMood = tooltipLabels[2].trim(),
                 sReviewMoodChartLabelMoodTrend = this.getLocalizedText("reviewMoodChartLabelMoodTrend"),
-                labels = this.createDayLabels(),
+                labels = this.createDayLabels(mode),
                 data, datasets = [];
 
-            if (currentDay > 6) {
+            if (mode == "weekly") {
+                currentDay = new Date() + 1;
+                maxDay = 7;
+            } else if (mode == "monthly") {
+                maxDay = 31;
+                currentDay = new Date().getDate();
+            }
+            if (currentDay > maxDay - 1) {
                 currentDay = 0;
             }
+
+            /*if (currentDay > 6) {
+                currentDay = 0;
+            }*/
             dayShift = -currentDay;
 
             outputData = this.createDataSet(inputData.map(function (item, index) {
                 console.log(item);
                 return item.value;   
-            }), dayShift);
+            }), dayShift, mode);
             console.log(outputData);
             var realMax = Math.max.apply(null, outputData);
             //if (realMax < moodAreasData.good[0]) {
@@ -511,7 +569,7 @@ sap.ui.define([
                     pointStrokeColor: "transparent",
                     pointHighlightFill: "transparent",
                     pointHighlightStroke: "transparent",
-                    data: this.createFlatDataSet(null).concat([0])
+                    data: this.createFlatDataSet(null, mode).concat([0])
                 });
             } else {
                 this.oDataSetsIndex.avg -= 4;
@@ -529,7 +587,7 @@ sap.ui.define([
                     pointStrokeColor: "transparent",
                     pointHighlightFill: "transparent",
                     pointHighlightStroke: "transparent",
-                    data: this.createFlatDataSet(average).concat(average)
+                    data: this.createFlatDataSet(average, mode).concat(average)
                 });
             } else {
                 this.oDataSetsIndex.med -= 1;
@@ -546,7 +604,7 @@ sap.ui.define([
                     pointStrokeColor: "transparent",
                     pointHighlightFill: "transparent",
                     pointHighlightStroke: "transparent",
-                    data: this.createFlatDataSet(median).concat(median)
+                    data: this.createFlatDataSet(median, mode).concat(median)
                 });
             } else {
                 this.oDataSetsIndex.moods -= 1;
@@ -578,7 +636,7 @@ sap.ui.define([
             }
 
             data = {
-                labels: this.createDataSet(labels, dayShift),
+                labels: this.createDataSet(labels, dayShift, mode),
                 datasets: datasets || [
                     {
                         fillColor: sGoodColor, //"rgba(220,220,220,0.2)",
@@ -707,26 +765,37 @@ sap.ui.define([
             });
         },
 
-        updateChart: function (inputData, oLineChart, min, max, avg, med, trendLine, areas) {
+        updateChart: function (inputData, oLineChart, min, max, avg, med, trendLine, areas, mode) {
             console.error(med);
             console.log(oLineChart.datasets);
             var controller = this,
                 lastDataset = oLineChart.datasets.length - 1,
                 moodDataSet = trendLine !== false ? lastDataset - 1 : lastDataset,
                 currentDay = new Date().getDay() + 1,
-                dayShift,
-                moodAreasData = areas !== false && this.createMoodAreaDatasets(min, max),
+                dayShift, maxDay,
+                moodAreasData = areas !== false && this.createMoodAreaDatasets(min, max, mode),
                 outputData, trendLineData,
                 average = avg !== false 
                     && ($.isNumeric(avg) ? avg : Formatter.average(inputData)),
                 median = med !== false 
                     && ($.isNumeric(med) ? med : Formatter.median(inputData)),
-                averageDataSet = $.isNumeric(average) && this.createFlatDataSet(average).concat(average),
-                medianDataSet = $.isNumeric(median) && this.createFlatDataSet(median).concat(median);
+                averageDataSet = $.isNumeric(average) && this.createFlatDataSet(average, mode).concat(average),
+                medianDataSet = $.isNumeric(median) && this.createFlatDataSet(median, mode).concat(median);
 
-            if (currentDay > 6) {
+            if (mode == "weekly") {
+                currentDay = new Date() + 1;
+                maxDay = 7;
+            } else if (mode == "monthly") {
+                maxDay = 31;
+                currentDay = new Date().getDate();
+            }
+            if (currentDay > maxDay - 1) {
                 currentDay = 0;
             }
+
+            /*if (currentDay > 6) {
+                currentDay = 0;
+            }*/
             dayShift = -currentDay;
 
             var realMax = Math.max.apply(null, inputData);
@@ -748,7 +817,7 @@ sap.ui.define([
 
             outputData = this.createDataSet(inputData.map(function(item, index) {
                 return item.value;   
-            }), dayShift);
+            }), dayShift, mode);
 
             if (avg !== false) {
                 $.each(averageDataSet, function (index, item) {

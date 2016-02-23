@@ -32,8 +32,9 @@ sap.ui.define([
     "sap/ui/model/Sorter",
     "mood_tracker/controller/BaseController",
     "mood_tracker/model/Formatter",
-    "mood_tracker/model/Mood"
-], function ($, Sorter, BaseController, Formatter, MoodModel) {
+    "mood_tracker/model/Mood",
+    "mood_tracker/util/Helpers"
+], function ($, Sorter, BaseController, Formatter, MoodModel, Helpers) {
     "use strict";
 
     var LogMood = BaseController.extend("mood_tracker.controller.detail.LogMood", {
@@ -52,30 +53,46 @@ sap.ui.define([
         updateLogMood: function () {
             var oView = this.getView(),
                 oPastPanel = oView.byId("pastPanel"),
-                oSorter = new Sorter("mood>day"),
+                oSorter,
                 model = oView.getModel("mood"),
-                days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
-                currentDay = new Date().getDay() + 1,
+                mode = model.getProperty("/mode"),
+                days, // = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+                today = new Date(),
+                currentDay, maxDay, // = new Date().getDay() + 1,
                 dayShift;
             //sap.ui.core.UIComponent.getRouterFor(this).attachRouteMatched(this.onRouteMatched, this);
 
-            if (currentDay > 6) {
+            if (mode == "weekly") {
+                oSorter = new Sorter("mood>day"),
+                days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+                currentDay = today.getDay() + 1;
+                maxDay = 7;
+                /*if (currentDay > 6) {
+                    currentDay = 0;
+                }*/
+            } else if (mode == "monthly") {
+                oSorter = new Sorter("mood>date"),
+                days = Helpers.range(1, 31, 1).map(String);
+                maxDay = 31;
+                currentDay = new Date().getDate();
+            }
+            if (currentDay > maxDay - 1) {
                 currentDay = 0;
             }
             dayShift = -currentDay;
 
             oSorter.fnCompare = function (value1, value2) {
-                var day1 = days.indexOf(value1.toUpperCase()) + dayShift,
-                    day2 = days.indexOf(value2.toUpperCase()) + dayShift;
+                var day1 = days.indexOf(("" + value1).toUpperCase()) + dayShift,
+                    day2 = days.indexOf(("" + value2).toUpperCase()) + dayShift;
                 if (day1 < 0) {
-                    day1 += 7;
-                } else if (day1 > 6) {
-                    day1 -= 7;
+                    day1 += maxDay; //7;
+                } else if (day1 > maxDay - 1) { //6) {
+                    day1 -= maxDay; //7;
                 }
                 if (day2 < 0) {
-                    day2 += 7;
-                } else if (day2 > 6) {
-                    day2 -= 7;
+                    day2 += maxDay; //7;
+                } else if (day2 > maxDay - 1) { //6) {
+                    day2 -= maxDay; //7;
                 }
                 if (day2 < day1) return -1;
                 if (day2 == day1) return 0;
@@ -89,7 +106,13 @@ sap.ui.define([
             var oView = this.getView(),
                 oSource = oEvent.getSource(),
                 oModel = oView.getModel("mood"),
+                mode = oModel.getProperty("/mode"),
+                currentDay;
+            if (mode == "weekly") {
                 currentDay = new Date().getDay();
+            } else if (mode == "monthly") {
+                currentDay = new Date().getDate() - 1;
+            }
             oModel.setProperty("/past/" + currentDay + "/value", oSource.getValue());
             oModel.refresh(true);
         },
@@ -101,7 +124,8 @@ sap.ui.define([
             oModel.setProperty("/average", Formatter.average(past));
             oModel.setProperty("/median", Formatter.median(past));
             if (!this.isTESTING()) {
-                MoodModel.storeValue("moods", past);
+                //MoodModel.storeValue("moods", past);
+                MoodModel.storeModelData(oModel, true);
             }
         }
     });
