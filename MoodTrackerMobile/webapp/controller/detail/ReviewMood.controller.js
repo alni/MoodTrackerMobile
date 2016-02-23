@@ -295,11 +295,16 @@ sap.ui.define([
                     //lineChartHtml.setContent("");
                     // Re-set the content of the Line Chart HTML control to 
                     // clear the current canvas
-                    lineChartHtml.setContent(["<div class='lineChartHtmlContent'>",
+                    lineChartHtml.setContent(["<div class='lineChartHtmlContent' style='width: "
+                    + data.graph.width + "%'>",
                         "<canvas width='100%' height='100%'></canvas>",
                         "</div>"].join(""));
                     
                 }
+                oView.byId("scrollCont").scrollTo(
+                    Number.MAX_SAFE_INTEGER, // Give a really large number to scroll to the end
+                    0,
+                    1000);
                 $lineChartHtml = lineChartHtml.$();//$(lineChartHtml.getDomRef());
                 console.log($lineChartHtml);
                 

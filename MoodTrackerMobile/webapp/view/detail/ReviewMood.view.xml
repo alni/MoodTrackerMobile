@@ -72,9 +72,11 @@
         </Bar>
       </subHeader>
       <content>
-        <core:HTML id="lineChartHtml" content="&lt;div class='lineChartHtmlContent'&gt;
-          &lt;canvas width='100%' height='100%' &gt;&lt;/canvas&gt;
-                   &lt;/div&gt;"></core:HTML>
+        <ScrollContainer id="scrollCont" width="100%" height="100%" vertical="false" class="lineChartScrollContainer">
+          <core:HTML id="lineChartHtml" content="&lt;div class='lineChartHtmlContent' style='width: {mood>/graph/width}%'&gt;
+            &lt;canvas width='100%' height='100%' &gt;&lt;/canvas&gt;
+                      &lt;/div&gt;"></core:HTML>
+        </ScrollContainer>
       </content>
     </Page>
 </core:View>

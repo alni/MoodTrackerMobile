@@ -149,7 +149,7 @@ sap.ui.define([
             } else {
                 var mode = MoodModel.readValue("moodMode", "weekly");
                 var today = new Date();
-                var moods, day, past;
+                var moods, day, past, graphWidth = 100;
                 if (mode == "weekly") {
                     day = today.getDay();
                     moods = MoodModel.readValue("moods", Helpers.flatRange(0, 7));
@@ -157,14 +157,16 @@ sap.ui.define([
                         moods = Helpers.flatRange(0, 7);
                     }
                     past = moods.map(pastMoodsMap);
+                    graphWidth = 100;
                 } else if (mode == "monthly") {
-                    day = today.getDate();
+                    day = today.getDate() - 1;
                     moods = MoodModel.readValue("moodsMonthly",
                         Helpers.flatRange(0, 31));
                     if (moods.length != 31) {
                         moods = Helpers.flatRange(0, 31);
                     }
                     past = moods.map(pastMoodsMapMonthly);
+                    graphWidth = (100 / 7) * 31;
                 }
                 
 
@@ -205,7 +207,8 @@ sap.ui.define([
                         },
                         areas: {
                             enabled: MoodModel.readValue("graphAreas", true)
-                        }
+                        },
+                        width: graphWidth
                     },
                 });
                 Helpers.setupReminders(moodModel,
