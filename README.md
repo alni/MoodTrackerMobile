@@ -43,3 +43,12 @@ You can contribute by
 * request new features or changes, 
 * forking the project and contributing to the code, 
 * spreading the word about this project
+
+## Related projects ##
+
+* [`MoodTracker`](https://github.com/alni/MoodTracker) - Mood Tracking for Pebble by @alni (myself)
+* [`mood`](https://github.com/goosey/mood) - health/mood tracker by @goosey
+* **T2 Mood Tracker** - by @t2health
+    * [Android Project Home](https://github.com/t2health/T2-Mood-Tracker-Android) - at GitHub
+    * [iOS Project Home](https://github.com/t2health/T2-Mood-Tracker-iOS) - at GitHub
+    * [Official Site: http://www.t2health.org](http://t2health.org/)
