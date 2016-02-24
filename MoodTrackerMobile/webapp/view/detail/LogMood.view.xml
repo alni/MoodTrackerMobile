@@ -99,9 +99,14 @@
                             }],
                             formatter: 'mood_tracker.model.Formatter.localizedFormattedMessage'
                           }" />
+                  <Input enabled="false" value="{mood>value}">
+                    <layoutData>
+                      <l:GridData span="L1 M1 S2" />
+                    </layoutData>
+                  </Input>
                   <Slider value="{mood>value}" min="{mood>/min}" max="{mood>/max}" step="{mood>/step}" enabled="{mood>editable}">
                     <layoutData>
-                      <l:GridData span="L3 M3 S8" />
+                      <l:GridData span="L3 M3 S7" />
                     </layoutData>
                   </Slider>
                   <ToggleButton icon="{= ${mood>editable} ? 'sap-icon://unlocked' : 'sap-icon://locked' }" pressed="{mood>editable}">
@@ -109,7 +114,8 @@
                       <l:GridData span="L1 M1 S3" />
                     </layoutData>
                   </ToggleButton>
-                </f:content>
+                
+              </f:content>
               </f:SimpleForm>
             </content>
           </Panel>
